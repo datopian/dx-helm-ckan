@@ -29,12 +29,14 @@ jobs:
         GITHUB_REF: ${{ env.GITHUB_REF }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        cd charts
+        echo 1111111111111111111111111
+        echo ${GITHUB_REF}
+        helm package ../ckan --version "${GITHUB_REF}"
+        helm repo index --url https://raw.githubusercontent.com/datopian/dx-helm-ckan/master/charts/ .
         git config --global user.email "travis-ci-operator@null"
         git config --global user.name "travis-ci-operator"
         git remote set-url --push origin https://zelima:$GITHUB_TOKEN@github.com/datopian/dx-helm-ckan
-        cd charts
-        helm package ../ckan --version "${GITHUB_REF}"
-        helm repo index --url https://raw.githubusercontent.com/datopian/dx-helm-ckan/master/charts/ .
         cd ..
         git checkout master
         git status
