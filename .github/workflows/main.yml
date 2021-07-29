@@ -24,9 +24,6 @@ jobs:
         ./get_helm.sh --version "${HELM_VERSION}"
         helm version --client && rm ./get_helm.sh
 
-    - name: Run the script
-      run: |
-        sudo bash .travis.sh script
     - name: Deploy
       env:
         GITHUB_REF: ${{ env.GITHUB_REF }}
