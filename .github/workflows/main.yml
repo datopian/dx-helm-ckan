@@ -16,25 +16,25 @@ jobs:
       uses: FranzDiebold/github-env-vars-action@v2
     - name: Install Helm
       env:
-        GITHUB_REF: ${{ env.GITHUB_REF }}
         HELM_VERSION: v3.6.3
       run: |
         curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
         chmod 700 get_helm.sh
         ./get_helm.sh --version "${HELM_VERSION}"
         helm version --client && rm ./get_helm.sh
-
-    - name: Deploy
+    - name: Get the tag name
       env:
         GITHUB_REF: ${{ env.GITHUB_REF }}
+      run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
+    - name: Deploy
+      env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        VERSION: ${{ env.CI_ACTION_REF_NAME }}
       run: |
         cd charts
         echo 1111111111111111111111111
         echo
-        echo ${GITHUB_REF}
-        helm package ../ckan --version "${GITHUB_REF}"
+        echo ${VERSION}
+        helm package ../ckan --version "${VERSION}"
         helm repo index --url https://raw.githubusercontent.com/datopian/dx-helm-ckan/master/charts/ .
         git config --global user.email "travis-ci-operator@null"
         git config --global user.name "travis-ci-operator"
@@ -42,6 +42,6 @@ jobs:
         cd ..
         git checkout master
         git status
-        git add charts/index.yaml charts/ckan-${GITHUB_REF}.tgz
-        git commit -m"upgrade helm chart repo to CKAN chart${GITHUB_REF}"
+        git add charts/index.yaml charts/ckan-${VERSION}.tgz
+        git commit -m"upgrade helm chart repo to CKAN chart${VERSION}"
         git push origin master
