@@ -19,19 +19,24 @@ able to configure things  like
 
 See full list of values and their reference in [Values File](/values.md)
 
-## Quickstart
+## Using Charts
 
-Each New project uses its own set of configurations (values.yaml) depending on
-its needs. All you need are [Charts.yaml](#charts.yaml) and [values.yaml](#values.yaml).
+Charts are installed with helm per project. Each New project uses its own set of configurations (values.yaml) depending on
+its needs. See [VALUES.md](#VALUES.md) for values reference.
+
+You will need [Charts.yaml](#charts.yaml) and [values.yaml](#values.yaml).
 
 ```
 mkdir my-awesome-project && cd my-awesome-project
 touch Charts.yaml values.yaml
 ```
 
-## Charts.yaml
+Your `Charts.yaml` defines what dependencies your helm deployment has.
+This repository also represents a remote repository for helm charts. You can set
+It in your Charts.yaml including version. Run `helm repo update` to get desired verison of cahrts
 
-Your `Charts.yaml` should look smth like this
+
+Example of how `Charts.yaml` might look like
 
 ```
 cat Charts.yaml
@@ -50,8 +55,8 @@ dependencies:
     version: "1.5.2"
     repository: http://storage.googleapis.com/kubernetes-charts-incubator
   - name: ckan
-    version: "0.0.1"
-    repository: "https://gitlab.com/datopian/experiments/dx-helm-ckan"
+    version: "1.3.0"
+    repository: "https://raw.githubusercontent.com/datopian/dx-helm-ckan/master/charts/""
 ```
 
 ### values.yaml
@@ -59,15 +64,19 @@ dependencies:
 See [values.example.yaml](/ckan/values.example.yaml) to get and idea how your `value.yaml`
 shold look like.
 
-## Release new version
+## Releasing new version
 
-Update the version in `ckan/Chart.yaml`
+New releases automated by GitHub actions. New versions are pushed to `charts` directory on tagged commit.
+
+To release new package commit your changes to the master and create a tagged release. Tags should be following semantic versions starting with "v"
 
 ```
-# Create Package
-cd charts
-helm package ../ckan
+# Make changes, commit  and push to master (you probably need to skip this step)
+git add <<changesd filed>>
+git commit -m'My awesome changes'
+git push origin master
 
-# Create New index
-helm repo index .
+# Create a tagged rlease
+git tag v1.1.1
+git push origin v1.1.1
 ```
