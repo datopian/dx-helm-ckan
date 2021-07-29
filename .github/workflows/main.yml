@@ -30,11 +30,14 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        TEMPDIR=`mktemp -d`
+        git clone https://github.com/datopian/dx-helm-ckan ${TEMPDIR} && cd ${TEMPDIR}
+        pwd
         cd charts
         helm package ../ckan --version "${VERSION}"
         helm repo index --url https://raw.githubusercontent.com/datopian/dx-helm-ckan/master/charts/ .
-        git config --global user.email "travis-ci-operator@null"
-        git config --global user.name "travis-ci-operator"
+        git config --global user.email "irakli.mchedlishvili@datopian.com"
+        git config --global user.name "zelima"
         git remote set-url --push origin https://zelima:$GITHUB_TOKEN@github.com/datopian/dx-helm-ckan
         cd ..
         git status
