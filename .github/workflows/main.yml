@@ -29,10 +29,6 @@ jobs:
       run: |
         sudo bash .travis.sh script
     - name: Deploy
-      on:
-        create:
-          tags:
-            - "v*"
       env:
         GITHUB_REF: ${{ env.GITHUB_REF }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
