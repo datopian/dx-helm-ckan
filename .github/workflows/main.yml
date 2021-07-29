@@ -28,10 +28,11 @@ jobs:
       env:
         GITHUB_REF: ${{ env.GITHUB_REF }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VERSION: ${{ env.CI_ACTION_REF_NAME }}
       run: |
         cd charts
         echo 1111111111111111111111111
-        GITHUB_REF=${GITHUB_REF/refs\/tags\//}
+        echo
         echo ${GITHUB_REF}
         helm package ../ckan --version "${GITHUB_REF}"
         helm repo index --url https://raw.githubusercontent.com/datopian/dx-helm-ckan/master/charts/ .
