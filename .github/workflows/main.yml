@@ -23,7 +23,6 @@ jobs:
         chmod 700 get_helm.sh
         ./get_helm.sh --version "${HELM_VERSION}"
         helm version --client && rm ./get_helm.sh
-        helm init --client-only
 
     - name: Run the script
       run: |
@@ -44,4 +43,4 @@ jobs:
         git status
         git add charts/index.yaml charts/ckan-${GITHUB_REF}.tgz
         git commit -m"upgrade helm chart repo to CKAN chart${GITHUB_REF}"
-        #git push origin master
+        git push origin master
