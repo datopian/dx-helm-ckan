@@ -1,0 +1,67 @@
+{{- if .Values.frontend.enable -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.general.projectId }}-frontend
+  labels:
+    app: frontend
+spec:
+  {{ if not .Values.frontend.hpa.enable }}
+  replicas: {{ .Values.frontend.replicaCount | default 2 }}
+  {{ end }}
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      annotations:
+        timestamp: {{ now | quote }}
+      labels:
+        app: frontend
+    spec:
+      {{ if .Values.general.imagePullSecrets }}
+      imagePullSecrets:
+        - name: {{ .Values.general.imagePullSecrets }}
+      {{ end }}
+      containers:
+        - name: frontend
+          {{ if .Values.frontend.image.digest }}
+          image: {{ .Values.frontend.image.repository }}@{{ .Values.frontend.image.digest }}
+          {{ else }}
+          image: {{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}
+          {{ end }}
+
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy | default "Always"}}
+          {{ if .Values.frontend.env }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.general.projectId }}-frontend-envvars
+          {{ end }}
+          ports:
+            - containerPort: 4000
+          {{ if .Values.frontend.runAsRoot }}
+          securityContext:
+            runAsUser: 0
+          {{ end }}
+          {{ if .Values.frontend.debug }}
+          command:
+            - bash
+            - "-c"
+            - "npm install -g nodemon && nodemon"
+          {{ end }}
+          {{ if .Values.frontend.customCommand }}
+          command: [ {{ .Values.frontend.customCommand }} ]
+          {{ end }}
+          {{ if .Values.frontend.resources }}
+          resources:
+            {{ with .Values.frontend.resources }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+          {{ end }}
+          {{ if .Values.frontend.livenessProbe }}
+          livenessProbe:
+            {{ with .Values.frontend.livenessProbe }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+          {{ end }}
+{{ end }}

@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ckan-config
+data:
+  ckan.sql: |
+    CREATE ROLE "ckan" WITH LOGIN PASSWORD ':ckan_password' NOSUPERUSER NOCREATEDB NOCREATEROLE;
+    CREATE DATABASE "ckan";
+
+    CREATE ROLE "ckan-datastore" WITH LOGIN PASSWORD ':datastore_password' NOSUPERUSER NOCREATEDB NOCREATEROLE;
+    CREATE DATABASE "ckan-datastore";
+
+    CREATE ROLE "ckan-datastore-ro" WITH LOGIN PASSWORD ':datastore_ro_password' NOSUPERUSER NOCREATEDB NOCREATEROLE;
+
+    -- Block not included in ckan-cloud-operator source code[1].
+    -- It was added because the original code would run this provisioning
+    -- in different steps, signing in and out with the different roles.
+    -- [1]: https://github.com/datopian/ckan-cloud-docker/blob/master/cca-operator/cca-operator.sh
+    GRANT "ckan" to "postgres";
+    GRANT "ckan-datastore" to "postgres";
+    GRANT "ckan-datastore-ro" to "postgres";
+    --- endblock
+
+    REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+    REVOKE USAGE ON SCHEMA public FROM PUBLIC;
+    GRANT CREATE ON SCHEMA public TO "ckan";
+    GRANT USAGE ON SCHEMA public TO "ckan";
+    GRANT CREATE ON SCHEMA public TO "ckan-datastore";
+    GRANT USAGE ON SCHEMA public TO "ckan-datastore";
+    ALTER DATABASE "ckan" OWNER TO "ckan";
+    ALTER DATABASE "ckan-datastore" OWNER TO "ckan";
+    REVOKE CONNECT ON DATABASE "ckan" FROM "ckan-datastore-ro";
+    GRANT CONNECT ON DATABASE "ckan-datastore" TO "ckan-datastore-ro";
+    GRANT USAGE ON SCHEMA public TO "ckan-datastore-ro";
+    ALTER DATABASE "ckan" OWNER TO "ckan";
+    ALTER DATABASE "ckan-datastore" OWNER TO "ckan-datastore";
+
+    \connect "ckan-datastore";
+
+    GRANT SELECT ON ALL TABLES IN SCHEMA public TO "ckan-datastore-ro";
+    ALTER DEFAULT PRIVILEGES FOR USER "ckan-datastore" IN SCHEMA public GRANT SELECT ON TABLES TO "ckan-datastore-ro";
+
+    CREATE OR REPLACE VIEW "_table_metadata" AS
+        SELECT DISTINCT
+            substr(md5(dependee.relname || COALESCE(dependent.relname, '')), 0, 17) AS "_id",
+            dependee.relname AS name,
+            dependee.oid AS oid,
+            dependent.relname AS alias_of
+        FROM
+            pg_class AS dependee
+            LEFT OUTER JOIN pg_rewrite AS r ON r.ev_class = dependee.oid
+            LEFT OUTER JOIN pg_depend AS d ON d.objid = r.oid
+            LEFT OUTER JOIN pg_class AS dependent ON d.refobjid = dependent.oid
+        WHERE
+            (dependee.oid != dependent.oid OR dependent.oid IS NULL) AND
+            -- is a table (from pg_tables view definition)
+            -- or is a view (from pg_views view definition)
+            (dependee.relkind = 'r'::"char" OR dependee.relkind = 'v'::"char")
+            AND dependee.relnamespace = (
+                SELECT oid FROM pg_namespace WHERE nspname='public')
+        ORDER BY dependee.oid DESC;
+    ALTER VIEW "_table_metadata" OWNER TO "ckan";
+    GRANT SELECT ON "_table_metadata" TO "ckan-datastore-ro";
+
+    CREATE OR REPLACE FUNCTION populate_full_text_trigger() RETURNS trigger
+    AS $body$
+        BEGIN
+            IF NEW._full_text IS NOT NULL THEN
+                RETURN NEW;
+            END IF;
+            NEW._full_text := (
+                SELECT to_tsvector(string_agg(value, ' '))
+                FROM json_each_text(row_to_json(NEW.*))
+                WHERE key NOT LIKE '\_%');
+            RETURN NEW;
+        END;
+    $body$ LANGUAGE plpgsql;
+    ALTER FUNCTION populate_full_text_trigger() OWNER TO "ckan";
+
+    DO $body$
+        BEGIN
+            EXECUTE coalesce(
+                (SELECT string_agg(
+                    'CREATE TRIGGER zfulltext BEFORE INSERT OR UPDATE ON ' ||
+                    quote_ident(relname) || ' FOR EACH ROW EXECUTE PROCEDURE ' ||
+                    'populate_full_text_trigger();', ' ')
+                FROM pg_class
+                LEFT OUTER JOIN pg_trigger AS t
+                    ON t.tgrelid = relname::regclass AND t.tgname = 'zfulltext'
+                WHERE relkind = 'r'::"char" AND t.tgname IS NULL
+                    AND relnamespace = (
+                        SELECT oid FROM pg_namespace WHERE nspname='public')),
+                'SELECT 1;');
+        END;
+    $body$;
+
+    CREATE EXTENSION postgis;
+    CREATE EXTENSION postgis_topology;
+
+    \connect "ckan";
+
+    CREATE EXTENSION postgis;
+    CREATE EXTENSION postgis_topology;

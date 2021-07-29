@@ -1,0 +1,62 @@
+##################
+### CKAN Build ###
+##################
+FROM ckan-base:2.7-2.0.0
+
+# Set CKAN version to build
+ENV GIT_URL=https://github.com/ckan/ckan.git
+ENV GIT_BRANCH=ckan-2.8.2
+ENV WHEEL_DIR=${APP_DIR}/venv/wheels
+
+ENV CKAN_SITE_URL=http://localhost:5000
+#ENV CKAN__PLUGINS envvars sentry s3filestore image_view text_view recline_view recline_grid recline_graph recline_map datastore datapusher resource_proxy
+# Lets try whitout the s3filestore
+ENV CKAN__PLUGINS envvars sentry image_view text_view recline_view recline_grid recline_graph recline_map datastore datapusher resource_proxy
+
+COPY scripts /usr/local/bin/
+
+USER 0
+
+# Fetch and build CKAN and requirements
+RUN apt-get update && apt-get install -y --no-install-recommends  \
+        git \
+        curl \
+        python \
+        libpq-dev \
+        linux-headers-amd64 \
+        gcc \
+        make \
+        g++ \
+        autoconf \
+        automake \
+        libtool \
+        libpcre3-dev \
+        python-dev\
+ && curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py \
+ && python ${SRC_DIR}/get-pip.py \
+ && rm -f ${SRC_DIR}/get-pip.py \
+ && ${APP_DIR}/venv/bin/pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan \
+ && rm -rf /srv/app/src/ckan/.git \
+ && cd ${SRC_DIR} \
+ && pip wheel --wheel-dir=${WHEEL_DIR} -r ckan/requirements.txt \
+ && pip wheel --wheel-dir=${WHEEL_DIR} gunicorn gevent==1.4.0 \
+ && . ${APP_DIR}/venv/bin/activate \
+ && pip install --no-index --find-links=${WHEEL_DIR} -r ckan/requirements.txt \
+ && pip install --no-index --find-links=${WHEEL_DIR} gunicorn gevent \
+ && cp ${SRC_DIR}/ckan/who.ini ${APP_DIR} \
+    # Install CKAN envvars to support loading config from environment variables
+ && pip install -e git+https://github.com/okfn/ckanext-envvars.git@0.0.1#egg=ckanext-envvars \
+ && pip install -e git+https://github.com/ckan/ckanext-harvest.git@v1.0.0#egg=ckanext-harvest \
+ && pip install -r https://raw.githubusercontent.com/ckan/ckanext-harvest/v1.0.0/pip-requirements.txt \
+    # Installing common extentions
+ && pip install --no-cache-dir -r https://raw.githubusercontent.com/okfn/ckanext-sentry/master/requirements.txt \
+ && pip install --no-cache-dir -e git+https://github.com/okfn/ckanext-sentry.git#egg=ckanext-sentry \
+ #&& pip install --no-cache-dir -r https://raw.githubusercontent.com/datopian/ckanext-s3filestore/fix-null-content-type/requirements.txt \
+ #&& pip install --no-cache-dir git+https://github.com/datopian/ckanext-s3filestore.git@fix-null-content-type#egg=ckanext-s3filestore \
+    # Create and update CKAN config
+ && paster --plugin=ckan make-config ckan ${APP_DIR}/production.ini \
+ && paster --plugin=ckan config-tool ${APP_DIR}/production.ini "ckan.plugins = ${CKAN__PLUGINS}" \
+ && chown -R 92:92 ${APP_DIR}
+
+#ONBUILD COPY . build
+ONBUILD RUN build

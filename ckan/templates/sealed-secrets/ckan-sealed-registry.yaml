@@ -1,0 +1,15 @@
+{{ if .Values.ckan.env }}
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  annotations:
+    sealedsecrets.bitnami.com/cluster-wide: "true"
+  name: "{{ .Values.general.imagePullSecrets }}"
+spec:
+  encryptedData:
+    .dockerconfigjson: {{ .Values.general.dockerconfigjson }}
+  template:
+    metadata:
+      name: "{{ .Values.general.imagePullSecrets }}"
+    type: kubernetes.io/dockerconfigjson
+{{ end }}

@@ -1,0 +1,12 @@
+{{- if .Values.xloader.supervisor -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.general.projectId }}-xloader-supervisor-svc
+spec:
+  ports:
+  - port: {{ .Values.xloader.supervisor.port | default 80 }}
+    targetPort: {{ .Values.xloader.supervisor.targetPort | default 9001 }}
+  selector:
+    app: xloader
+{{ end }}

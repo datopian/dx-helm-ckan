@@ -1,0 +1,61 @@
+#!/bin/bash -e
+
+DX_FILES_PATH=${1:-${APP_DIR}}
+REQUIREMENTS_DX_FILE="${DX_FILES_PATH}/requirements_dx.txt"
+PLUGINS_DX_FILE="${DX_FILES_PATH}/plugins_dx.txt"
+INI_DX_FILE="${DX_FILES_PATH}/ini_dx.txt"
+
+[ -f "${PLUGINS_DX_FILE}" ] && CKAN__EXTRA_PLUGINS=$(cat "${PLUGINS_DX_FILE}")
+
+
+if [ -f "${REQUIREMENTS_DX_FILE}" ]; then
+    # Installing extensions requirements
+    # shellcheck disable=SC2207
+    EXT_REQUIREMENTS=($(grep -e "requirements.*txt$" "${REQUIREMENTS_DX_FILE}"))
+    
+    echo "Running remote requirements install"
+    
+    for REQUIREMENT in "${EXT_REQUIREMENTS[@]}"
+    do
+            echo "Installing: $REQUIREMENT"
+            pip install -r "${REQUIREMENT}" # Running system pip first to get the depenecies properly compiled
+            "${APP_DIR}"/venv/bin/pip install -r "${REQUIREMENT}" # Running virtualenv pip to get it installed
+    done
+    
+    # Installing extensions
+    # shellcheck disable=SC2207
+    EXT_REPOS=($(grep -v -e "requirements.*txt$" "${REQUIREMENTS_DX_FILE}"))
+    
+    echo "Running remote repositories extentions install"
+    
+    for EXTENSION in "${EXT_REPOS[@]}"
+    do
+            echo "Installing: $EXTENSION"
+            pip install -e "${EXTENSION}" # Running system pip first to get the depenecies properly compiled
+            "${APP_DIR}"/venv/bin/pip install -e "${EXTENSION}" # Running virtualenv pip to get it installed
+    done
+fi
+
+# Installing patches
+for dir in /srv/patches/*; do 
+    # For each folder in patches
+    if [ -d "${dir}" ]; then 
+        # For each patch file
+        for patch_file in $(find "${dir}" -type f -name "*.patch" | sort -g); do 
+            echo "Processing patch ${patch_file}"
+            # Applying the patch file
+            # shellcheck disable=SC2086
+            cd "${SRC_DIR}/$(basename ${dir})" && echo "$0: Applying patch ${patch_file} to ${SRC_DIR}/$(basename ${dir})"; patch -p1 < "${patch_file}" ; 
+        done ; 
+    fi ; 
+done 
+
+# Removing and recreating the production.ini file
+rm -f "${APP_DIR}/production.ini"
+"${APP_DIR}"/venv/bin/paster --plugin=ckan make-config ckan "${APP_DIR}/production.ini"
+
+# Setting up the plugins
+"${APP_DIR}"/venv/bin/paster --plugin=ckan config-tool "${APP_DIR}/production.ini" "ckan.plugins = ${CKAN__PLUGINS} ${CKAN__EXTRA_PLUGINS}"
+
+# Installing extra production.ini settings
+[ -f "${APP_DIR}/ini_dx.txt" ] && (cat "${APP_DIR}/ini_dx.txt" >> "${APP_DIR}/production.ini") || exit 0

@@ -1,0 +1,13 @@
+{{- if .Values.frontend.enable -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.general.projectId }}-frontend-svc
+spec:
+  ports:
+    - name: web
+      port: {{ .Values.frontend.port | default 80 }}
+      targetPort: {{ .Values.frontend.targetPort | default 4455 }}
+  selector:
+    app: frontend
+{{ end }}

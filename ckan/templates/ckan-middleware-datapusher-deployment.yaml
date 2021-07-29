@@ -1,0 +1,70 @@
+{{- if .Values.ckanmiddleware.enable -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.general.projectId }}-ckan-middleware
+spec:
+  {{ if not .Values.general.autoscaling.enable }}
+  replicas: {{ .Values.ckanmiddleware.replicaCount | default 1 }}
+  {{ end }}
+  selector:
+    matchLabels:
+      app: ckan-middleware
+  template:
+    metadata:
+      annotations: {}
+      labels:
+        app: ckan-middleware
+    spec:
+      {{ if .Values.general.imagePullSecrets }}
+      imagePullSecrets:
+        - name: "{{ .Values.general.imagePullSecrets }}"
+      {{ end }}
+      serviceAccountName: {{ .Values.general.projectId }}
+      {{ if .Values.ckan.runAsRoot }}
+      securityContext:
+        runAsUser: 0
+      {{ end }}
+      containers:
+        - name: ckan-middleware
+          envFrom:
+            {{ if .Values.ckan.env }}
+            - secretRef:
+                name: {{ .Values.general.projectId }}-ckan-envvars
+            {{ end }}
+          {{ if .Values.ckan.runAsRoot }}
+          securityContext:
+            runAsUser: 0
+          {{ end }}
+          image: "{{ .Values.ckan.image.repository }}:{{ .Values.ckan.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.ckan.image.pullPolicy | default "Always" }}
+          {{ if .Values.ckan.sleep }}
+          command: ["/bin/sh"]
+          args: ["-c", "echo Sleeping for 1h; sleep 3600"]
+          {{ end }}
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 1
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 5000
+            timeoutSeconds: 5
+          resources:
+            {{ if .Values.ckanmiddleware.resources }}
+            {{ with .Values.ckanmiddleware.resources }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+            {{ else }}
+            limits:
+              cpu: 1000m
+              memory: 4G
+            requests:
+              cpu: 600m
+              memory: 2G
+            {{ end }}
+{{- end}}

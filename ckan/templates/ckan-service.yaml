@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.general.projectId }}-ckan-svc
+spec:
+  type: {{ .Values.ckan.serviceType | default "ClusterIP" }}
+  ports:
+    - port: {{ .Values.ckan.port | default 80 }}
+      targetPort: {{ .Values.ckan.targetPort | default 5000 }}
+      protocol: TCP
+      name: http
+  selector:
+    app: ckan

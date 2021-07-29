@@ -1,0 +1,71 @@
+############################
+### CKAN Base Virtualenv ###
+############################
+FROM debian:buster-slim as virtualenv
+
+# Set src dirs
+ENV APP_DIR=/srv/app
+
+    # Create a local user and group to run the app
+RUN mkdir -p ${APP_DIR} \
+    # Install pip
+ && apt-get update && apt-get install -y \
+        python \
+        curl \
+ && curl -o ${APP_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py \
+ && python ${APP_DIR}/get-pip.py \
+ && rm -f ${APP_DIR}/get-pip.py \
+ && pip install virtualenv \
+ && cd ${APP_DIR} && virtualenv --symlinks -p /usr/bin/python venv
+
+#################
+### CKAN Base ###
+#################
+FROM debian:buster-slim
+
+LABEL maintainer="info@datopian.com"
+
+# Set CKAN version to build
+ENV GIT_URL=https://github.com/ckan/ckan.git
+
+# Set src dirs
+ENV APP_DIR=/srv/app
+ENV SRC_DIR=${APP_DIR}/src
+ENV PIP_SRC=${SRC_DIR}
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ UTC
+
+# Copies the virtual environment and utility files
+COPY --from=virtualenv /srv/app /srv/app
+COPY scripts /usr/local/bin/
+COPY startup ${APP_DIR}
+COPY licenses /etc/
+
+    # Create the src directory
+RUN mkdir -p ${SRC_DIR} /var/lib/ckan \
+    # Create a local user and group to run the app
+ && addgroup --system --gid 92 ckan \
+ && adduser --system --uid 92 --home ${APP_DIR} --no-create-home --disabled-password --disabled-login --gid 92 ckan \
+    # Install minimum runtime dependencies
+ && apt-get update && apt-get install -y --no-install-recommends \
+        python \
+        #libpcre3 \
+        libmagic1 \
+        libpq5 \
+    # Assign permissions to ckan user
+ && chown -R 92:92 ${APP_DIR} /var/lib/ckan /usr/local/bin/start \
+    # Removing unused libraries and binaries
+ && apt-get clean autoclean \
+ && apt-get autoremove --yes \
+ && rm -rf /var/lib/apt/lists/* 
+
+WORKDIR ${APP_DIR}
+
+# Sets the user to ckan
+USER 92
+
+# For uWSGI proper termination the SIGINT should be sent instead the default SIGTERM
+# Ref: https://uwsgi-docs.readthedocs.io/en/latest/Management.html#signals-for-controlling-uwsgi
+#STOPSIGNAL SIGINT
+
+ENTRYPOINT ["start"]

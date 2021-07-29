@@ -1,0 +1,26 @@
+{{ if .Values.ckan.hpa.enable }}
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Values.general.projectId }}-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Values.general.projectId }}-ckan
+  minReplicas: {{ .Values.ckan.hpa.minReplicas | default 1 }}
+  maxReplicas: {{ .Values.ckan.hpa.maxReplicas | default 5 }}
+  metrics:
+  {{ if .Values.ckan.hpa.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: {{ .Values.ckan.hpa.targetCPUUtilizationPercentage }}
+  {{ end }}
+  {{ if .Values.ckan.hpa.targetMemoryUtilizationPercentage}}
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: {{ .Values.ckan.hpa.targetMemoryUtilizationPercentage }}
+  {{ end }}
+{{ end }}

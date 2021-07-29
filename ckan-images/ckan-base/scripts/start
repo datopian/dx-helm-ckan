@@ -1,0 +1,15 @@
+#!/bin/bash -e
+
+# shellcheck disable=SC1090
+. "${APP_DIR}"/venv/bin/activate
+
+# Run the prerun script to init CKAN and create the default admin user
+#python "${APP_DIR}"/prerun.py
+
+# Set the common GUnicorn options
+GUNICORN_OPTS=" --bind :5000 --user 92 --group 92 --preload --workers=2 -k gevent --worker-connections=2000 -p gunicorn.pid --worker-class=gevent --worker-tmp-dir /dev/shm --paste production.ini"
+
+# Start GUnicorn
+#exec gunicorn "${GUNICORN_OPTS}"
+
+gunicorn --bind 0.0.0.0:5000 --user 92 --group 92 --preload --workers=2 -k gevent --worker-connections=2000 -p gunicorn.pid --worker-class=gevent --worker-tmp-dir /dev/shm --paste production.ini

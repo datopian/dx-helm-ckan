@@ -1,0 +1,19 @@
+{{- if .Values.frontend.enable -}}
+
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: frontend-envvars
+stringData:
+  API_URL: https://montreal-dev.ckan.io/api/3/action/
+  THEME: ckan-montreal
+  NODE_ENV: staging
+  DISQUS_PAGES: /search /news
+  SITE_URL: https://montreal-frontend-staging.ckan.io
+  PLUGINS: ckan_pages carto dashboard applications-showcase disqus
+  TRANSLATIONS: /themes/ckan-montreal/i18n
+  DEFAULT_LOCALE: fr
+  GIT_OWNER: datopian
+
+{{- end }}

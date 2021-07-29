@@ -1,0 +1,14 @@
+{{ if .Values.giftless.enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.general.projectId }}-giftless-svc
+spec:
+  ports:
+  - name: giftless
+    port: {{ .Values.giftless.port | default 5000 }}
+    protocol: TCP
+    targetPort: {{ .Values.giftless.targetPort | default 5000 }}
+  selector:
+    app: giftless
+{{ end }}

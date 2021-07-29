@@ -1,0 +1,64 @@
+{{ if .Values.dataSubscriptions.enable }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.general.projectId }}-data-subscriptions
+  labels:
+    app: data-subscriptions
+spec:
+  {{ if not .Values.dataSubscriptions.hpa.enable }}
+  replicas: {{ .Values.dataSubscriptions.replicaCount | default 2 }}
+  {{ end }}
+  selector:
+    matchLabels:
+      app: data-subscriptions
+  template:
+    metadata:
+      labels:
+        app: data-subscriptions
+    spec:
+      containers:
+        - name: data-subscriptions-api
+          {{ if .Values.dataSubscriptions.image.digest }}
+          image: {{ .Values.dataSubscriptions.image.repository | default "datopian/data-subscriptions" }}@{{ .Values.dataSubscriptions.image.digest }}
+          {{ else }}
+          image: {{ .Values.auth.image.repository | default "registry.gitlab.com/datopian/data-subscriptions" }}:{{ .Values.auth.image.tag }}
+          {{ end }}
+          imagePullPolicy: {{ .Values.dataSubscriptions.image.pullPolicy | default "Always" }}
+          {{ if .Values.dataSubscriptions.env }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.general.projectId }}-data-subscriptions-envvars
+          {{ end }}
+          {{ if .Values.dataSubscriptions.livenessProbe }}
+          livenessProbe:
+            {{ with .Values.dataSubscriptions.livenessProbe }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+          {{ end }}
+            # - secretRef:
+            #     name: national-grid-redis
+          ports:
+            - containerPort: 5500
+        - name: data-subscriptions-worker
+          {{ if .Values.dataSubscriptions.image.digest }}
+          image: {{ .Values.dataSubscriptions.image.repository | default "datopian/data-subscriptions" }}@{{ .Values.dataSubscriptions.image.digest}}
+          {{ else }}
+          image: {{ .Values.auth.image.repository | default "registry.gitlab.com/datopian/data-subscriptions" }}:{{ .Values.auth.image.tag }}
+          {{ end }}
+          imagePullPolicy: {{ .Values.dataSubscriptions.image.pullPolicy | default "Always" }}
+          command: ["celery", "-A", "data_subscriptions.worker.tasks", "worker", "-B", "--loglevel=DEBUG", "--schedule=/tmp/celerybeat-schedule"]
+          {{ if .Values.dataSubscriptions.env }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.general.projectId }}-data-subscriptions-envvars
+          {{ end }}
+          {{ if .Values.dataSubscriptions.livenessProbe }}
+          livenessProbe:
+            {{ with .Values.dataSubscriptions.livenessProbe }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+          {{ end }}
+            # - secretRef:
+            #     name: national-grid-redis
+{{ end }}

@@ -1,0 +1,13 @@
+{{ if .Values.general.maintenance }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: maintenance-svc
+spec:
+  ports:
+    - name: maintenance
+      port: 80
+      targetPort: 80
+  selector:
+    app: maintenance
+{{ end }}

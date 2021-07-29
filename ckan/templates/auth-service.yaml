@@ -1,0 +1,18 @@
+{{ if .Values.auth.enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.general.projectId }}-auth-svc
+spec:
+  ports:
+    - name: public-api
+      port: 4433
+    - name: admin-api
+      port: 4434
+    - name: mailslurper-ui
+      port: 4436
+    - name: mailslurper-api
+      port: 4437
+  selector:
+    app: auth
+{{ end }}

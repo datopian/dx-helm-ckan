@@ -1,0 +1,8 @@
+https://raw.githubusercontent.com/datopian/ckanext-authz-service/master/requirements.py2.txt
+git+https://github.com/datopian/ckanext-authz-service.git#egg=ckanext-authz-service
+https://raw.githubusercontent.com/datopian/ckanext-external-storage/master/requirements.py2.txt
+git+https://github.com/datopian/ckanext-external-storage.git#egg=ckanext-external-storage
+https://raw.githubusercontent.com/datopian/ckanext-s3filestore/fix-null-content-type/requirements.txt
+git+https://github.com/datopian/ckanext-s3filestore.git@fix-null-content-type#egg=ckanext-s3filestore
+https://raw.githubusercontent.com/okfn/ckanext-sentry/master/requirements.txt
+git+https://github.com/okfn/ckanext-sentry.git#egg=ckanext-sentry

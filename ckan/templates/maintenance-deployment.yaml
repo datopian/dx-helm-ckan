@@ -1,0 +1,50 @@
+{{ if .Values.general.maintenance }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maintenance-deployment
+  labels:
+    app: maintenance
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: maintenance
+  template:
+    metadata:
+      annotations:
+        timestamp: {{ now | quote }}
+      labels:
+        app: maintenance
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.general.imagePullSecrets }}
+      containers:
+        - name: maintenance
+          image: {{ .Values.general.maintenanceImage | default "registry.gitlab.com/datopian/deploys/maintenance-page:latest" }}
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "10m"
+            limits:
+              memory: "128Mi"
+              cpu: "10m"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 5
+{{ end }}

@@ -1,0 +1,171 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.general.projectId }}-ckan
+spec:
+  {{ if not .Values.ckan.hpa.enable }}
+  replicas: {{ .Values.ckan.replicaCount | default 2 }}
+  {{ end }}
+  selector:
+    matchLabels:
+      app: ckan
+  template:
+    metadata:
+      annotations:
+        timestamp: {{ now | quote }}
+      labels:
+        app: ckan
+    spec:
+      {{ if .Values.general.imagePullSecrets }}
+      imagePullSecrets:
+        - name: "{{ .Values.general.imagePullSecrets }}"
+      {{ end }}
+      serviceAccountName: {{ .Values.general.projectId }}
+      {{ if .Values.ckan.runAsRoot }}
+      securityContext:
+        runAsUser: 0
+      {{ end }}
+      {{ if .Values.ckan.runInitContainers }}
+      initContainers:
+        - name: database
+          image: {{ .Values.ckan.ckanOperatorImage | quote | default "viderum/ckan-cloud-docker:cca-operator-latest" }}
+          command:
+          - bash
+          - "-c"
+          - |
+            /etc/config/initContainer.sh &&\
+            echo ckan DB initialized successfully && exit 0
+            echo failed to initialize, waiting 1 hour before exiting && sleep 3600 && exit 1
+          env:
+            - name: CKAN_CLOUD_INSTANCE_ID
+              value: {{ .Values.general.projectId | quote }}
+            - name: CKAN_CLOUD_POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ckan.envVarsSecretName | quote }}
+                  key: "POSTGRES_HOST"
+            - name: CKAN_CLOUD_POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ckan.envVarsSecretName | quote }}
+                  key: "POSTGRES_SUPER_USER"
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ckan.envVarsSecretName | quote }}
+                  key: "POSTGRES_SUPER_USER_PASSWORD"
+            - name: CKAN_SQLALCHEMY_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.general.projectId }}-ckan-envvars
+                  key: "CKAN_SQLALCHEMY_URL"
+            - name: CKAN__DATASTORE__WRITE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.general.projectId }}-ckan-envvars
+                  key: "CKAN__DATASTORE__WRITE_URL"
+            - name: CKAN__DATASTORE__READ_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.general.projectId }}-ckan-envvars
+                  key: "CKAN__DATASTORE__READ_URL"
+          volumeMounts:
+            - mountPath: /etc/config/
+              name: ckan-deployment
+              readOnly: true
+            {{ if .Values.ckan.enableIni }}
+            - mountPath: /etc/ckan/production.ini
+              name: ckan-config-file
+              readOnly: true
+              subPath: production.ini
+            {{ end }}
+      {{ end }}
+      containers:
+        - name: ckan
+          envFrom:
+            {{ if .Values.ckan.env }}
+            - secretRef:
+                name: {{ .Values.general.projectId }}-ckan-envvars
+            {{ end }}
+          {{ if .Values.ckan.runAsRoot }}
+          securityContext:
+            runAsUser: 0
+          {{ end }}
+          {{ if .Values.ckan.image.digest }}
+          image: "{{ .Values.ckan.image.repository }}@{{ .Values.ckan.image.digest }}"
+          {{ else }}
+          image: "{{ .Values.ckan.image.repository }}:{{ .Values.ckan.image.tag }}"
+          {{ end }}
+          imagePullPolicy: {{ .Values.ckan.image.pullPolicy | default "Always" }}
+          {{ if .Values.ckan.sleep }}
+          command: ["/bin/sh"]
+          args: ["-c", "echo Sleeping for 1h; sleep 3600"]
+          {{ end }}
+          {{ if .Values.ckan.customCommand }}
+          command: [ {{ .Values.ckan.customCommand }}]
+          {{ end }}
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 1
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 5000
+            timeoutSeconds: 5
+          {{ if .Values.ckan.livenessProbe }}
+          livenessProbe:
+            {{ with .Values.ckan.livenessProbe }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+          {{ end }}
+          resources:
+            {{ if .Values.ckan.resources }}
+            {{ with .Values.ckan.resources }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+            {{ else }}
+            limits:
+              cpu: 1500m
+              memory: 3G
+            requests:
+              cpu: 800m
+              memory: 2G
+            {{ end }}
+          volumeMounts:
+            {{ if .Values.giftless.enable -}}
+            - name: giftless-configmap
+              mountPath: /config
+              readOnly: true
+            - mountPath: /giftless
+              name: jwt-keys
+              readOnly: true
+            {{ end }}
+            {{ if .Values.ckan.enableIni }}
+            - mountPath: /etc/ckan/production.ini
+              name: ckan-config-file
+              readOnly: true
+              subPath: production.ini
+            {{ end }}
+      volumes:
+        {{ if .Values.giftless.enable -}}
+        - name: giftless-configmap
+          configMap:
+            name: giftless-configmap
+        - name: jwt-keys
+          secret:
+            secretName: jwt-keys
+        {{ end }}
+        - name: ckan-deployment
+          configMap:
+            defaultMode: 0777
+            name: ckan-deployment
+        {{ if .Values.ckan.enableIni }}
+        - name: ckan-config-file
+          configMap:
+            defaultMode: 0777
+            name: ckan-config-file
+        {{ end }}

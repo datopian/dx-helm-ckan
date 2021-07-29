@@ -1,0 +1,31 @@
+{{ if .Values.dataSubscriptions.enable }}
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  annotations:
+    sealedsecrets.bitnami.com/cluster-wide: "true"
+  name: "{{ .Values.general.projectId }}-data-subscriptions-sealed-envvars"
+spec:
+  template:
+    metadata:
+      name: "{{ .Values.general.projectId }}-data-subscriptions-sealed-envvars"
+    type: Opaque
+  encryptedData:
+    CKAN_API_KEY: {{ .Values.dataSubscriptions.env.API_KEY }}
+    CKAN_URL: {{ .Values.dataSubscriptions.env.CKAN_URL }}
+    CLOUDAMQP_APIKEY: {{ .Values.dataSubscriptions.env.CLOUDAMQP_APIKEY }}
+    CLOUDAMQP_URL: {{ .Values.dataSubscriptions.env.CLOUDAMQP_URL }}
+    DATABASE_URL: {{ .Values.dataSubscriptions.env.DATABASE_URL }}
+    FLASK_ENV: {{ .Values.dataSubscriptions.env.FLASK_ENV | default "development" }}
+    FRONTEND_SITE_URL: {{ .Values.dataSubscriptions.env.FRONTEND_SITE_URL }}
+    MAILER_FROM_EMAIL: {{ .Values.dataSubscriptions.env.MAILER_FROM_EMAIL }}
+    MAILER_FROM_NAME: {{ .Values.dataSubscriptions.env.MAILER_FROM_NAME }}
+    PAPERTRAIL_API_TOKEN: {{ .Values.dataSubscriptions.env.PAPERTRAIL_API_TOKEN }}
+    REDIS_HOST: {{ .Values.dataSubscriptions.env.REDIS_HOST }}
+    SENDGRID_API_KEY: {{ .Values.dataSubscriptions.env.SENDGRID_API_KEY }}
+    SENDGRID_TEMPLATE_ID_FOR_DATASET_UPDATE: {{ .Values.dataSubscriptions.env.SENDGRID_TEMPLATE_ID_FOR_DATASET_UPDATE }}
+    SENDGRID_TEMPLATE_ID_FOR_NEW_DATASET: {{ .Values.dataSubscriptions.env.SENDGRID_TEMPLATE_ID_FOR_NEW_DATASET }}
+    SENDGRID_TEMPLATE_ID: {{ .Values.dataSubscriptions.env.SENDGRID_TEMPLATE_ID }}
+    TIME_IN_SECONDS_BETWEEN_ACTIVITY_PULLS: {{ .Values.dataSubscriptions.env.TIME_IN_SECONDS_BETWEEN_ACTIVITY_PULLS | default "600" }}
+    TIME_IN_SECONDS_BETWEEN_NOTIFICATION_DELIVERIES: {{ .Values.dataSubscriptions.env.TIME_IN_SECONDS_BETWEEN_NOTIFICATION_DELIVERIES | default "637" }}
+{{ end }}

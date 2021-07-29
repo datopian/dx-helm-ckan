@@ -1,0 +1,126 @@
+# Default values for ckan.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+general:
+  maintenance: false
+imagePullSecrets:
+  - name: ckan-sealed-registry
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+domain: ckan.staging.datopian.com
+useProductionCerts: false
+
+datapusher:
+  enable: false
+  image:
+    repository: registry.gitlab.com/viderum/docker-datapusher
+    tag: cloud-datapusher-1-v9
+    pullPolicy: Always
+
+ckan:
+  useIni:
+    enable: false
+    iniPath: "/srv/app/production.ini"
+  domain: ckan.ckan.staging.datopian.com
+  image:
+    repository: registry.gitlab.com/datopian/clients/datahub
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: latest
+  env:
+    EXAMPLE_ENV: ""
+  service:
+    type: ClusterIP
+    port: 80
+
+  ckanOperatorImage: viderum/ckan-cloud-docker:cca-operator-latest
+  envVarsSecretName: ckan-cloud-centeralized-sql
+
+frontend:
+  enbale: false
+
+giftless:
+  enable: false
+  image:
+    repository: datopian/giftless
+    tag: 0.1.1
+  port: 5000
+  project: datopian-dx
+  JwtRs256Key: "VerySecret"
+  JwtRs256KeyPub: "NotThatSecretButStill"
+  GoogleAccountCredentials: "ExtremlyTopSecret"
+
+sealedSecrets:
+  enable: true
+  ckan: {}
+  registry:
+    dockerconfigjson: "QuiteSecret"
+
+podAnnotations: {}
+
+podSecurityContext:
+  {}
+  # fsGroup: 2000resources: {}
+
+ingress:
+  enable: true
+  enableExternal: false
+  hosts:
+    - host: ckan.datahub.staging.datopian.com
+      paths:
+        - /
+    - host: api.datahub.io
+      isExternal: true
+      paths:
+        - path: /(.*)
+          service: ckan-svc
+          port: 80
+    - host: datahub.io
+      isExternal: true
+      paths:
+        - path: /(.*)
+          service: frontend-svc
+          port: 80
+  tls:
+    - secretName: ckan.datahub.staging.datopian.com
+      hosts:
+        - ckan.datahub.staging.datopian.com
+    - secretName: api.datahub.io
+      isExternal: true
+      hosts:
+        - api.datahub.io
+    - secretName: datahub.io
+      isExternal: true
+      hosts:
+        - datahub.io
+
+autoscaling:
+  enable: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+solr:
+  image:
+    tag: 6.6.6
+
+postgresql:
+  enable: false

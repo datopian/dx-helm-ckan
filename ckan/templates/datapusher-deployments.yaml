@@ -1,0 +1,59 @@
+{{- if .Values.datapusher.enable -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.general.projectId }}-datapusher
+  labels:
+    app: datapusher
+spec:
+  {{ if not .Values.datapusher.hpa.enable }}
+  replicas: {{ .Values.datapusher.replicaCount | default 1 }}
+  {{ end }}
+  selector:
+    matchLabels:
+      app: datapusher
+  template:
+    metadata:
+      labels:
+        app: datapusher
+    spec:
+      {{ if .Values.general.imagePullSecrets }}
+      imagePullSecrets:
+        - name: "{{ .Values.general.imagePullSecrets }}"
+      {{ end }}
+      containers:
+      - name: datapusher
+        {{ if .Values.datapusher.image.digest }}
+        image: "{{ .Values.datapusher.image.repository | default "registry.gitlab.com/viderum/docker-datapusher" }}@{{ .Values.datapusher.image.digest }}"
+        {{ else }}
+        image: "{{ .Values.datapusher.image.repository | default "registry.gitlab.com/viderum/docker-datapusher" }}:{{ .Values.datapusher.image.tag }}"
+        {{ end }}
+
+        imagePullPolicy: {{ .Values.ckan.image.pullPolicy | default "Always" }}
+        {{ if .Values.datapusher.env }}
+        envFrom:
+          - secretRef:
+              name: {{ .Values.general.projectId }}-datapusher-envvars
+        {{ end }}
+        {{ if .Values.datapusher.livenessProbe }}
+        livenessProbe:
+          {{ with .Values.datapusher.livenessProbe }}
+          {{ toYaml . | nindent 12 }}
+          {{ end }}
+        {{ end }}
+        resources:
+          {{ if .Values.datapusher.resources }}
+          {{ with .Values.datapusher.resources }}
+          {{ toYaml . | nindent 12 }}
+          {{ end }}
+          {{ else }}
+          limits:
+            cpu: 1500m
+            memory: 4G
+          requests:
+            cpu: 800m
+            memory: 2G
+          {{ end }}
+        ports:
+        - containerPort: 8000
+{{ end }}

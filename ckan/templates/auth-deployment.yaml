@@ -1,0 +1,42 @@
+{{ if .Values.auth.enable }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.general.projectId }}-auth
+  labels:
+    app: auth
+spec:
+  {{ if not .Values.auth.hpa.enable }}
+  replicas: {{ .Values.auth.replicaCount | default 2 }}
+  {{ end }}
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      {{ if .Values.general.imagePullSecrets }}
+      imagePullSecrets:
+        - name: {{ .Values.general.imagePullSecrets }}
+      {{ end }}
+      containers:
+        - name: auth
+          {{ if .Values.auth.image.digest }}
+          image: {{ .Values.auth.image.repository | default "registry.gitlab.com/datopian/clients/nextgen-auth" }}@{{ .Values.auth.image.digest }}
+          {{ else }}
+          image: {{ .Values.auth.image.repository | default "registry.gitlab.com/datopian/clients/nextgen-auth" }}:{{ .Values.auth.image.tag }}
+          {{ end }}
+          command: ["kratos", "serve", "-c", "/etc/config/kratos/.kratos.yml", "--dev"]
+          {{ if .Values.auth.env }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.general.projectId }}-auth-envvars
+          {{ end }}
+        - name: mailslurper
+          image: oryd/mailslurper:latest-smtps
+          envFrom:
+            - secretRef:
+                name: {{ .Values.general.projectId }}-auth-envvars
+{{ end }}

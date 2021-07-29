@@ -1,0 +1,62 @@
+{{- if .Values.xloader.enable -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.general.projectId }}-xloader
+  labels:
+    app: xloader
+spec:
+  replicas: {{ .Values.xloader.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      app: xloader
+  template:
+    metadata:
+      labels:
+        app: xloader
+    spec:
+      {{ if .Values.general.imagePullSecrets }}
+      imagePullSecrets:
+        - name: "{{ .Values.general.imagePullSecrets }}"
+      {{ end }}
+      containers:
+      - name: xloader
+        {{ if .Values.xloader.image.digest }}
+        image: "{{ .Values.xloader.image.repository }}@{{ .Values.xloader.image.digest }}"
+        {{ else }}
+        image: "{{ .Values.xloader.image.repository }}:{{ .Values.xloader.image.tag }}"
+        {{ end }}
+
+        imagePullPolicy: {{ .Values.xloader.image.pullPolicy | default "Always" }}
+        
+        envFrom:
+          {{ if .Values.ckan.env }}
+          - secretRef:
+              name: {{ .Values.general.projectId }}-ckan-envvars
+          {{ end }}
+          {{ if .Values.xloader.env }}
+          - secretRef:
+              name: {{ .Values.general.projectId }}-xloader-envvars  
+          {{ end }}
+        {{ if .Values.xloader.customCommand }}
+        command: [ {{ .Values.xloader.customCommand }}]
+        {{ end }}
+        resources:
+          {{ if .Values.xloader.resources }}
+          {{ with .Values.xloader.resources }}
+          {{ toYaml . | nindent 12 }}
+          {{ end }}
+          {{ else }}
+          limits:
+            cpu: 800m
+            memory: 1.5G
+          requests:
+            cpu: 400m
+            memory: 1G
+          {{ end }}
+        ports:
+        - containerPort: 8000
+          name: xloader
+        - containerPort: 9001
+          name: supervisor
+{{ end }}

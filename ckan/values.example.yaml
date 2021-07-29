@@ -1,0 +1,227 @@
+ckan:
+  general:
+    useProductionCerts: true
+    projectId: may-awesome-project
+    dockerconfigjson: SealedCredentialsForDockerCOntainerRegistry
+    imagePullSecrets: ckan-sealed-registry
+    customResource: true
+    resources: {}
+
+
+  ingress:
+    enable: true
+    enableExternal: false
+    enableExternalCertificate: false
+    hosts:
+      - host: ckan.my-awesome-project.staging.datopian.com
+        isExternal: false
+        paths:
+          - path: /(.*)
+            service: may-awesome-project-ckan-svc
+            port: 80
+      - host: my-awesome-project.staging.datopian.com
+        isExternal: false
+        paths:
+          - path: /(.*)
+            service: may-awesome-project-frontend-svc
+            port: web
+    tls:
+      - secretName: ckan.my-awesome-project.staging.datopian.com
+        hosts:
+          - ckan.my-awesome-project.staging.datopian.com
+      - secretName: my-awesome-project.staging.datopian.com
+        hosts:
+          - my-awesome-project.staging.datopian.com
+    external:
+      hosts:
+        - host: ckan.my-awesome-project.staging.datopian.com
+          isExternal: true
+          paths:
+            - path: /(.*)
+              service: may-awesome-project-ckan-svc
+              port: 80
+        - host: my-awesome-project.staging.datopian.com
+          isExternal: true
+          paths:
+            - path: /(.*)
+              service: may-awesome-project-frontend-svc
+              port: web
+      tls:
+        - secretName: ckan.my-awesome-project.staging.datopian.com
+          hosts:
+            - ckan.my-awesome-project.staging.datopian.com
+        - secretName: my-awesome-project.staging.datopian.com
+          hosts:
+            - my-awesome-project.staging.datopian.com
+    externalCertificate:
+      hosts:
+        - host: ckan.my-awesome-project.staging.datopian.com
+          isExternal: true
+          tlsSecret:
+            crt: value
+            key: value
+            name: secretname
+          paths:
+            - path: /(.*)
+              service: may-awesome-project-ckan-svc
+              port: 80
+      tls:
+        - secretName: ckan.my-awesome-project.staging.datopian.com
+          hosts:
+            - ckan.my-awesome-project.staging.datopian.com
+
+  solr:
+    image:
+      tag: 6.6.6
+
+  ckan:
+    #sleep: true
+    #runAsRoot: true
+    domain: ckan.my-awesome-project.staging.datopian.com
+    image:
+      repository: registry.gitlab.com/viderum/cloud-my-awesome-project-staging
+      pullPolicy: Always
+      tag: developer-experience-setup
+    service:
+      type: ClusterIP
+      port: 80
+    hpa:
+      enable: true
+      targetMemoryUtilizationPercentage: 80
+    env:
+      CKAN___BEAKER__SESSION__URL: postgresql://my-awesome-project:Secret@11.22.333.444:5432/my-awesome-project
+      CKAN___BEAKER__SESSION__SECRET: Secret
+      CKAN___BEAKER__SESSION__TYPE: database
+      CKAN___BEAKER__SESSION__KEY: ckan
+      CKAN___BEAKER__SESSION__TABLE_NAME: beaker_sessions
+      CKAN___LICENSES_GROUP_URL: file:///ext/licenses.json
+      CKAN___SCHEMING__DATASET_SCHEMAS: ckanext.scheming:ckan_dataset.json
+      CKAN___SCHEMING__PRESETS: ckanext.scheming:presets.json
+      CKAN__CORS__ORIGIN_ALLOW_ALL: "True"
+      CKAN__DATAPUSHER__URL: http://may-awesome-project-datapusher-svc:80/
+      CKAN__DATASETS_PER_PAGE: "25"
+      CKAN__DATASTORE__READ_URL: postgresql://my-awesome-project-datastore-ro:Secret@11.22.333.444:5432/my-awesome-project-datastore
+      CKAN__DATASTORE__WRITE_URL: postgresql://my-awesome-project-datastore:Secret@11.22.333.444:5432/my-awesome-project-datastore
+      CKAN__HARVEST__MQ__TYPE: redis
+      CKAN__HIDE_ACTIVITY_FROM_USERS: my-awesome-project
+      CKAN__NATIONALGRID__DATA_SUBSCRIPTIONS_API_URL: http://may-awesome-project-data-subscriptions-svc:80/api/v1/
+      CKAN__RESOURCE_PROXY__MAX_FILE_SIZE: "100000000"
+      CKAN__SITE_TITLE: "My Awesome Project"
+      CKAN__STORAGE_PATH: /tmp
+      CKAN__TRACKING_ENABLED: "True"
+      CKAN__VIEWS__DEFAULT_VIEWS: "image_view recline_view pdf_view geojson_view"
+      CKAN_SITE_ID: my-awesome-project
+      CKAN_SITE_URL: https://ckan.my-awesome-project.staging.datopian.com
+      CKAN_SMTP_MAIL_FROM: noreply@my-awesome-projecteso.com
+      CKAN_SMTP_PASSWORD: Secret
+      CKAN_SMTP_SERVER: smtp.sendgrid.net:587
+      CKAN_SMTP_USER: apikey
+      CKAN_SOLR_URL: http://may-awesome-project-solr-svc:8983/solr/may-awesome-project
+      CKAN_SQLALCHEMY_URL: postgresql://my-awesome-project:Secret@11.22.333.444:5432/my-awesome-project
+      CKAN_SYSADMIN_EMAIL: test@datopian.com
+      CKAN_SYSADMIN_NAME: ckan_admin
+      CKAN_SYSADMIN_PASSWORD: secret
+      CKANEXT__PAGES_ALLOW_HTML: "True"
+      CKANEXT__PAGES_EDITOR: ckeditor
+      CKANEXT__S3FILESTORE__AWS_SECRET_ACCESS_KEY: Secret
+      CKANEXT__S3FILESTORE__AWS_ACCESS_KEY_ID: Secret
+      CKANEXT__S3FILESTORE__SIGNATURE_VERSION: s3v4
+      CKANEXT__S3FILESTORE__AWS_BUCKET_NAME: dx-may-awesome-project
+      CKANEXT__S3FILESTORE__AWS_STORAGE_PATH: may-awesome-project
+      CKANEXT__S3FILESTORE__REGION_NAME: europe-west1
+      CKANEXT__S3FILESTORE__HOST_NAME: https://storage.googleapis.com
+      CKANEXT__VALIDATION__PASS_AUTH_HEADER: "True"
+      CKANEXT__VALIDATION__PASS_AUTH_HEADER_VALUE: Secret
+      MAINTENANCE_MODE: "False"
+
+  frontend:
+    enable: true
+    image:
+      repository: registry.gitlab.com/datopian/clients/my-awesome-project
+      tag: staging
+    env:
+      API_KEY: Secret-API-Key
+      API_URL: https://ckan.my-awesome-project.staging.datopian.com/api/3/action/
+      DATA_SUBSCRIPTIONS_API_URL: http://may-awesome-project-data-subscriptions-svc:80/api/v1/
+      GA_ID: ""
+      KRATOS_ADMIN_URL: http://may-awesome-project-auth-svc:4434/
+      KRATOS_PUBLIC_URL: http://may-awesome-project-auth-svc:4433/
+      NODE_ENV: staging
+      PLUGINS: "google-analytics wp"
+      PORT: "4455"
+      SECURITY_MODE: cookie
+      SESSION_COOKIE_MAX_AGE: "1800000"
+      SESSION_SECRET: Secret
+      SITE_URL: https://my-awesome-project.staging.datopian.com
+      THEME: my-awesome-project
+      WP_BLOG_PATH: /blog
+      WP_URL: https://datamy-awesome-projecteso.wordpress.com/
+      WP_TOKEN: SecretToKen
+      WP_SHOW_DRAFT: "true"
+
+
+  datapusher:
+    enable: true
+    image:
+      repository: registry.gitlab.com/viderum/docker-datapusher
+      tag: cloud-datapusher-1-v9
+      pullPolicy: Always
+    hpa:
+      enable: true
+      targetMemoryUtilizationPercentage: 80
+
+  dataSubscriptions:
+    enable: true
+    image:
+      repository: datopian/data-subscriptions
+      tag: latest
+      pullPolicy: Always
+    env:
+      CKAN_API_KEY: Secret-API-Key
+      CKAN_URL: http://may-awesome-project-ckan-svc:80
+      CLOUDAMQP_APIKEY: Secret
+      CLOUDAMQP_URL: amqps://user:Secreta@kangaroo.rmq.cloudamqp.com/grxddqqd")
+      DATABASE_URL: postgresql://data-subscriptions:secret@11.22.333.444:5432/data-subscriptions
+      FLASK_ENV: production
+      FRONTEND_SITE_URL: https://my-awesome-project.staging.datopian.com/
+      MAILER_FROM_EMAIL: "noreply@my-awesome-projecteso.com"
+      MAILER_FROM_NAME: "ESO Data Portal"
+      PAPERTRAIL_API_TOKEN: ""
+      REDIS_HOST: may-awesome-project-redis-master
+      TIME_IN_SECONDS_BETWEEN_ACTIVITY_PULLS: "600"
+      TIME_IN_SECONDS_BETWEEN_NOTIFICATION_DELIVERIES: "637"
+
+  auth:
+    enable: true
+    image:
+      repository: registry.gitlab.com/datopian/clients/nextgen-auth
+      tag: latest
+      pullPolicy: Always
+    dsn: SealedSecretForDSN
+
+  giftless:
+    enable: false
+
+  postgresql:
+    enable: false
+
+  ckanmiddleware:
+    enable: true
+    replicaCount: 1
+    ingress:
+      enable: true
+      proxyReadTimeOut: '36000'
+      proxyConnectTimeout: '36000'
+      proxyBodySize: 5000M
+      hosts:
+        - host: ckan.vanilla.dev.datopian.com
+          paths:
+            - path: /api/3/action/datastore_create
+              service: vanilla-dev-middleware-ckan-svc
+              port: 80
+      tls:
+        - secretName: ckan.vanilla.dev.datopian.com
+          hosts:
+            - ckan.vanilla.dev.datopian.com
+      domain: ckan.vanilla.dev.datopian.com
+      resources: {}

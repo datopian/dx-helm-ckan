@@ -1,0 +1,84 @@
+{{- if .Values.giftless.enable -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.general.projectId }}-giftless
+spec:
+  progressDeadlineSeconds: 600
+  {{ if not .Values.giftless.hpa.enable }}
+  replicas: {{ .Values.giftless.replicaCount | default 2 }}
+  {{ end }}
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: giftless
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: giftless
+    spec:
+      {{ if .Values.general.imagePullSecrets }}
+      imagePullSecrets:
+        - name: {{ .Values.general.imagePullSecrets }}
+      {{ end }}
+      containers:
+      - command: ["uwsgi", "-M", "-T", "--threads", "2", "-p", "2", "--manage-script-name", "--callable", "app", "--http", "0.0.0.0:5000"]
+        envFrom:
+          {{ if .Values.giftless.env }}
+          - secretRef:
+              name: {{ .Values.general.projectId }}-giftless-envvars
+          {{ end }}
+        {{ if .Values.giftless.runAsRoot }}
+        securityContext:
+          runAsUser: 0
+        {{ end }}
+        {{ if .Values.giftless.image.digest }}
+        image: "{{ .Values.giftless.image.repository | default "datopian/giftless" }}@{{ .Values.giftless.image.digest }}"
+        {{ else }}
+        image: "{{ .Values.giftless.image.repository | default "datopian/giftless" }}:{{ .Values.giftless.image.tag }}"
+        {{ end }}
+
+        imagePullPolicy: Always
+        {{ if .Values.giftless.sleep }}
+        command: ["/bin/sh"]
+        args: ["-c", "echo Sleeping for 1h; sleep 3600"]
+        {{ end }}
+        name: giftless
+        ports:
+        - containerPort: {{ .Values.giftless.port | default 5000 }}
+          protocol: TCP
+        resources: {}
+        {{ if .Values.giftless.livenessProbe }}
+        livenessProbe:
+          {{ with .Values.giftless.livenessProbe }}
+          {{ toYaml . | nindent 12 }}
+          {{ end }}
+        {{ end }}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /config
+          name: jwt-key-pub
+          readOnly: true
+        - mountPath: /giftless
+          name: giftless-configmap
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: jwt-key-pub
+        secret:
+          defaultMode: 420
+          secretName: jwt-keys
+      - name: giftless-configmap
+        configMap:
+          defaultMode: 420
+          name: giftless-configmap
+
+{{- end }}

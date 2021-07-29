@@ -1,0 +1,37 @@
+{{ if .Values.giftless.enable }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: giftless-configmap
+data:
+  giftless.yaml: |
+    AUTH_PROVIDERS:
+      - factory: giftless.auth.jwt:factory
+        options:
+          algorithm: RS256
+          public_key_file: /config/jwt-rs256.key.pub
+
+    TRANSFER_ADAPTERS:
+      basic:
+        factory: giftless.transfer.basic_external:factory
+        options:
+          storage_class: giftless.storage.google_cloud:GoogleCloudStorage
+          storage_options:
+            project_name: {{ .Values.giftless.project }}
+            bucket_name: {{ .Values.giftless.bucket }}
+            account_key_base64: {{ .Values.giftless.GoogleAccountCredentials }}
+
+    PRE_AUTHORIZED_ACTION_PROVIDER:
+      factory: giftless.auth.jwt:factory
+      options:
+        algorithm: HS256
+        key_id: giftless-internal-jwt-key
+        private_key: "aFNWQ0hVM2NZVXd2WDE0MA=="
+
+    MIDDLEWARE:
+      - class: werkzeug.middleware.proxy_fix:ProxyFix
+        kwargs:
+          x_host: 1
+          x_port: 1
+          x_prefix: 1
+{{ end }}
