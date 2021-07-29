@@ -31,17 +31,14 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         cd charts
-        echo 1111111111111111111111111
-        echo
-        echo ${VERSION}
         helm package ../ckan --version "${VERSION}"
         helm repo index --url https://raw.githubusercontent.com/datopian/dx-helm-ckan/master/charts/ .
         git config --global user.email "travis-ci-operator@null"
         git config --global user.name "travis-ci-operator"
         git remote set-url --push origin https://zelima:$GITHUB_TOKEN@github.com/datopian/dx-helm-ckan
         cd ..
-        git checkout master
         git status
+        git branch
         git add charts/index.yaml charts/ckan-${VERSION}.tgz
         git commit -m"upgrade helm chart repo to CKAN chart${VERSION}"
         git push origin master
