@@ -3,7 +3,25 @@ entries:
   ckan:
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2021-08-06T12:14:38.788004538Z"
+    created: "2021-08-06T12:37:00.273866213Z"
+    dependencies:
+    - name: solr
+      repository: http://storage.googleapis.com/kubernetes-charts-incubator
+      version: 1.5.2
+    - condition: postgresql.enable
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 9.1.4
+    description: The world's leading Open Source data portal platform.
+    digest: e697464713944230978a901ef9156c70522fb8db25868e10586bb38935ef0469
+    name: ckan
+    type: application
+    urls:
+    - https://raw.githubusercontent.com/datopian/dx-helm-ckan/master/charts/ckan-v1.4.0.tgz
+    version: v1.4.0
+  - apiVersion: v2
+    appVersion: 2.8.2
+    created: "2021-08-06T12:37:00.265456529Z"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -21,7 +39,25 @@ entries:
     version: v1.4.0-rc6
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2021-08-06T12:14:38.780096285Z"
+    created: "2021-08-06T12:37:00.259461413Z"
+    dependencies:
+    - name: solr
+      repository: http://storage.googleapis.com/kubernetes-charts-incubator
+      version: 1.5.2
+    - condition: postgresql.enable
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 9.1.4
+    description: The world's leading Open Source data portal platform.
+    digest: 87dc63a1d23e2b416740ee1b2b40f2ba14e5906b9e4dfebd8ff2ba6761cd7426
+    name: ckan
+    type: application
+    urls:
+    - https://raw.githubusercontent.com/datopian/dx-helm-ckan/master/charts/ckan-v1.4.0-rc1.tgz
+    version: v1.4.0-rc1
+  - apiVersion: v2
+    appVersion: 2.8.2
+    created: "2021-08-06T12:37:00.25249323Z"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -37,4 +73,4 @@ entries:
     urls:
     - https://raw.githubusercontent.com/datopian/dx-helm-ckan/master/charts/ckan-v1.3.0.tgz
     version: v1.3.0
-generated: "2021-08-06T12:14:38.766179091Z"
+generated: "2021-08-06T12:37:00.243229086Z"
