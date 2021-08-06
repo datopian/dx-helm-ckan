@@ -1,0 +1,50 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: job-ckan-db-backup
+spec:
+  schedule: {{ .Values.ckan.backupCronTab | quote | default "0 1 * * *" }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          imagePullSecrets:
+            - name: ckan-sealed-registry
+          containers:
+          - name: job-ckan-db-backup
+            envFrom:
+              - secretRef:
+                  name: ckan-demo-prod-ckan-envvars
+            image: "{{ .Values.ckan.image.repository }}:latest"
+            imagePullPolicy: IfNotPresent
+            command:
+            - bash
+            - "-c"
+            - |
+              wget https://dl.min.io/client/mc/release/linux-amd64/mc
+              chmod +x mc
+              echo Preparing Dump...
+              pg_dump $CKAN_SQLALCHEMY_URL -F c -f {{ .Values.general.projectId }}.tar.gz --no-owner --no-acl
+              echo Uploading to Google Storage...
+              ./mc alias set {{ .Values.general.projectId }} $CKANEXT__S3FILESTORE__HOST_NAME $CKANEXT__S3FILESTORE__AWS_ACCESS_KEY_ID $CKANEXT__S3FILESTORE__AWS_SECRET_ACCESS_KEY --api $CKANEXT__S3FILESTORE__SIGNATURE_VERSION
+              ./mc cp {{ .Values.general.projectId }}.tar.gz {{ .Values.general.projectId }}/dx-cluster-backup/database-backups/{{ .Values.general.projectId }}/$(date '+%d-%m-%y')/{{ .Values.general.projectId }}$(date '+%d%m%y%H%M%S').tar.gz
+              echo Success
+          - name: job-datastore-db-backup
+            envFrom:
+              - secretRef:
+                  name: ckan-demo-prod-ckan-envvars
+            image: "{{ .Values.ckan.image.repository }}:latest"
+            imagePullPolicy: IfNotPresent
+            command:
+            - bash
+            - "-c"
+            - |
+              wget https://dl.min.io/client/mc/release/linux-amd64/mc
+              chmod +x mc
+              echo Preparing Dump...
+              pg_dump $CKAN__DATASTORE__WRITE_URL -F c -f {{ .Values.general.projectId }}-datastore.tar.gz --no-owner --no-acl
+              echo Uploading to Google Storage...
+              ./mc alias set {{ .Values.general.projectId }}-datastore $CKANEXT__S3FILESTORE__HOST_NAME $CKANEXT__S3FILESTORE__AWS_ACCESS_KEY_ID $CKANEXT__S3FILESTORE__AWS_SECRET_ACCESS_KEY --api $CKANEXT__S3FILESTORE__SIGNATURE_VERSION
+              ./mc cp {{ .Values.general.projectId }}.tar.gz {{ .Values.general.projectId }}/dx-cluster-backup/database-backups/{{ .Values.general.projectId }}/$(date '+%d-%m-%y')/{{ .Values.general.projectId }}-datastore$(date '+%d%m%y%H%M%S').tar.gz
+              echo Success
+          restartPolicy: OnFailure
