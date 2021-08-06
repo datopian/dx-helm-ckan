@@ -35,9 +35,8 @@ jobs:
         helm repo index --url https://raw.githubusercontent.com/datopian/dx-helm-ckan/master/charts/ .
         TEMPDIR=`mktemp -d`
         git clone https://github.com/datopian/dx-helm-ckan ${TEMPDIR}
-        pwd
-        cp charts/ckan-${VERSION}.tgz $TEMPDIR/charts/ckan-${VERSION}.tgz
-        cp charts/index.yaml $TEMPDIR/charts/index.yaml
+        cp ckan-${VERSION}.tgz $TEMPDIR/charts/ckan-${VERSION}.tgz
+        cp index.yaml $TEMPDIR/charts/index.yaml
         cd ${TEMPDIR}
         git config --global user.email "irakli.mchedlishvili@datopian.com"
         git config --global user.name "zelima"
