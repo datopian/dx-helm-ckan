@@ -33,6 +33,7 @@ All the values that need to be overrider from the ckan chart should come under `
   - `ckan.general.sealedSecrets.enable` - Flag to enable scaled secrets [default: `true`]
   - `ckan.general.sealedSecrets.registry` - Private registry metadata
     - `ckan.general.sealedSecrets.registry.dockerconfigjson` - base64 encoded encrypted secretes from private registry
+- `backupCronTab` - schedule expressions as a cron tab [default: `0 1 * * *`]
 
 ## Values For Nginx Ingress
 
