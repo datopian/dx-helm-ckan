@@ -6,6 +6,7 @@ spec:
   schedule: {{ .Values.ckan.backupCronTab | quote | default "0 1 * * *" }}
   jobTemplate:
     spec:
+      ttlSecondsAfterFinished: 86400
       template:
         spec:
           imagePullSecrets:
@@ -45,6 +46,6 @@ spec:
               pg_dump $CKAN__DATASTORE__WRITE_URL -F c -f {{ .Values.general.projectId }}-datastore.tar.gz --no-owner --no-acl
               echo Uploading to Google Storage...
               ./mc alias set {{ .Values.general.projectId }}-datastore $CKANEXT__S3FILESTORE__HOST_NAME $CKANEXT__S3FILESTORE__AWS_ACCESS_KEY_ID $CKANEXT__S3FILESTORE__AWS_SECRET_ACCESS_KEY --api $CKANEXT__S3FILESTORE__SIGNATURE_VERSION
-              ./mc cp {{ .Values.general.projectId }}.tar.gz {{ .Values.general.projectId }}/dx-cluster-backup/database-backups/{{ .Values.general.projectId }}/$(date '+%d-%m-%y')/{{ .Values.general.projectId }}-datastore$(date '+%d%m%y%H%M%S').tar.gz
+              ./mc cp {{ .Values.general.projectId }}-datastore.tar.gz {{ .Values.general.projectId }}/dx-cluster-backup/database-backups/{{ .Values.general.projectId }}/$(date '+%d-%m-%y')/{{ .Values.general.projectId }}-datastore$(date '+%d%m%y%H%M%S').tar.gz
               echo Success
           restartPolicy: OnFailure
