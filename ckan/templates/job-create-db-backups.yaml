@@ -15,7 +15,7 @@ spec:
           - name: job-ckan-db-backup
             envFrom:
               - secretRef:
-                  name: ckan-demo-prod-ckan-envvars
+                  name: {{ .Values.general.projectId }}-ckan-envvars
             image: "{{ .Values.ckan.image.repository }}:latest"
             imagePullPolicy: IfNotPresent
             command:
@@ -33,7 +33,7 @@ spec:
           - name: job-datastore-db-backup
             envFrom:
               - secretRef:
-                  name: ckan-demo-prod-ckan-envvars
+                  name: {{ .Values.general.projectId }}-ckan-envvars
             image: "{{ .Values.ckan.image.repository }}:latest"
             imagePullPolicy: IfNotPresent
             command:
