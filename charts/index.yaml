@@ -3,7 +3,25 @@ entries:
   ckan:
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2021-09-27T10:56:19.509366066Z"
+    created: "2021-09-27T13:21:35.00204883Z"
+    dependencies:
+    - name: solr
+      repository: https://charts.bitnami.com/bitnami
+      version: 2.0.6
+    - condition: postgresql.enable
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 9.1.4
+    description: The world's leading Open Source data portal platform.
+    digest: 16486d8c00fb44e3fb53e0124c1dbc0f65b12e820a02033cb61eb52a35d0be91
+    name: ckan
+    type: application
+    urls:
+    - https://raw.githubusercontent.com/datopian/dx-helm-ckan/master/charts/ckan-v1.5.0-rc1.tgz
+    version: v1.5.0-rc1
+  - apiVersion: v2
+    appVersion: 2.8.2
+    created: "2021-09-27T13:21:34.989593443Z"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -21,7 +39,7 @@ entries:
     version: v1.4.4
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2021-09-27T10:56:19.500496875Z"
+    created: "2021-09-27T13:21:34.981535315Z"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -39,7 +57,7 @@ entries:
     version: v1.4.3
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2021-09-27T10:56:19.492670531Z"
+    created: "2021-09-27T13:21:34.974474478Z"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -57,7 +75,7 @@ entries:
     version: v1.4.2
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2021-09-27T10:56:19.483860042Z"
+    created: "2021-09-27T13:21:34.967577841Z"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -75,7 +93,7 @@ entries:
     version: v1.4.1
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2021-09-27T10:56:19.474791743Z"
+    created: "2021-09-27T13:21:34.959708511Z"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -93,7 +111,7 @@ entries:
     version: v1.4.0
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2021-09-27T10:56:19.464595894Z"
+    created: "2021-09-27T13:21:34.951666884Z"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -111,7 +129,7 @@ entries:
     version: v1.4.0-rc6
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2021-09-27T10:56:19.453576608Z"
+    created: "2021-09-27T13:21:34.942130869Z"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -129,7 +147,7 @@ entries:
     version: v1.4.0-rc1
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2021-09-27T10:56:19.445684561Z"
+    created: "2021-09-27T13:21:34.935508029Z"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -145,4 +163,4 @@ entries:
     urls:
     - https://raw.githubusercontent.com/datopian/dx-helm-ckan/master/charts/ckan-v1.3.0.tgz
     version: v1.3.0
-generated: "2021-09-27T10:56:19.434461266Z"
+generated: "2021-09-27T13:21:34.925273621Z"
