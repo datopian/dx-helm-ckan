@@ -22,7 +22,7 @@ spec:
             - bash
             - "-c"
             - |
-              wget https://dl.min.io/client/mc/release/linux-amd64/mc
+              wget https://dl.min.io/client/mc/release/linux-amd64/mc || curl https://dl.min.io/client/mc/release/linux-amd64/mc --output mc
               chmod +x mc
               echo Preparing Dump...
               pg_dump $CKAN_SQLALCHEMY_URL -F c -f {{ .Values.general.projectId }}.tar.gz --no-owner --no-acl
@@ -40,7 +40,7 @@ spec:
             - bash
             - "-c"
             - |
-              wget https://dl.min.io/client/mc/release/linux-amd64/mc
+              wget https://dl.min.io/client/mc/release/linux-amd64/mc || curl https://dl.min.io/client/mc/release/linux-amd64/mc --output mc
               chmod +x mc
               echo Preparing Dump...
               pg_dump $CKAN__DATASTORE__WRITE_URL -F c -f {{ .Values.general.projectId }}-datastore.tar.gz --no-owner --no-acl
