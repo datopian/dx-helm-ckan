@@ -1,9 +1,9 @@
 dependencies:
 - name: solr
-  repository: http://storage.googleapis.com/kubernetes-charts-incubator
-  version: 1.5.2
+  repository: https://charts.bitnami.com/bitnami
+  version: 2.0.6
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
   version: 9.1.4
-digest: sha256:b33dcc369d53bba75ca049ad5e43c2c517675f130d13cbf729b4817eb68d52cd
-generated: "2020-10-30T14:21:52.828493115+04:00"
+digest: sha256:54ff005558f2ff432ce2d2d76088b9c259a6d63909bbce09a7053855bfc054ee
+generated: "2021-09-27T17:11:44.891441275+04:00"
