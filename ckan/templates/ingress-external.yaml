@@ -15,7 +15,7 @@ metadata:
     {{ else }}
     cert-manager.io/cluster-issuer: letsencrypt-staging-external
     {{ end }}
-    kubernetes.io/ingress.class: nginx-production
+    kubernetes.io/ingress.class: {{ .Values.ingress.ingressClass | quote | default "nginx-production" }}
     {{ if .Values.giftless.enable }}
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header X-Forwarded-Prefix /_giftless;
