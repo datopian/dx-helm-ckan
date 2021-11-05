@@ -20,6 +20,8 @@ metadata:
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header X-Forwarded-Prefix /_giftless;
     {{ end }}
+    nginx.ingress.kubernetes.io/limit-connections: "{{ .Values.ingress.limitConnections | default 20 }}"
+    nginx.ingress.kubernetes.io/limit-rps: "{{ .Values.ingress.limitRps | default 25 }}"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "{{ .Values.ingress.proxyConnectTimeout | default 60 }}"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "{{ .Values.ingress.proxyReadTimeOut | default 60 }}"
     nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingress.proxyBodySize | default "1000M" }}
@@ -54,7 +56,7 @@ spec:
             backend:
               {{ if $.Values.general.maintenance }}
               serviceName: maintenance-svc
-              servicePort: 80            
+              servicePort: 80
               {{ else }}
               serviceName: {{ .service }}
               servicePort: {{ .port }}
