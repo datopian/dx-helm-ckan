@@ -119,8 +119,10 @@ tolerations: []
 affinity: {}
 
 solr:
+  enable: true
   image:
     tag: 6.6.6
 
 postgresql:
   enable: false
+  
