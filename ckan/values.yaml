@@ -122,6 +122,7 @@ solr:
   enable: true
   image:
     tag: 6.6.6
+    pullPolicy: always
 
 postgresql:
   enable: false
