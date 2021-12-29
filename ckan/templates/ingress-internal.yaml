@@ -51,12 +51,13 @@ spec:
           {{- range .paths }}
           - path: {{ .path }}
             backend:
-              {{ if $.Values.general.maintenance }}
-              serviceName: maintenance-svc
-              servicePort: 80
-              {{ else }}
-              serviceName: {{ .service }}
-              servicePort: {{ .port }}
+              service:
+                {{ if $.Values.general.maintenance }}
+                name: maintenance-svc
+                port: 80
+                {{ else }}
+                name: {{ .service }}
+                port: {{ .port }}
               {{ end }}
           {{- end }}
     {{- end }}
