@@ -29,6 +29,10 @@ All the values that need to be overrider from the ckan chart should come under `
   - `ckan.general.autoscaling.minReplicas` - Minimum number of replicas [default: `1`]
   - `ckan.general.autoscaling.targetCPUUtilizationPercentage` - Target CPU Utilization in Percentage [default: `80`]
   - `ckan.general.autoscaling.targetMemoryUtilizationPercentage` - Target Memory Utilization in Percentage [default: `80`]
+- `ckan.general.env` - Environment Variables for global use (EG Postgre Super User credentials)
+  - `ckan.general.env.POSTGRES_HOST` - Postgres Host
+  - `ckan.general.env.POSTGRES_SUPER_USER` - Postgres Super User username
+  - `ckan.general.env.POSTGRES_SUPER_USER_PASSWORD` - Postgres Super User password
 - `ckan.general.sealedSecrets` - Object containing metadata about sealed secrets
   - `ckan.general.sealedSecrets.enable` - Flag to enable scaled secrets [default: `true`]
   - `ckan.general.sealedSecrets.registry` - Private registry metadata
