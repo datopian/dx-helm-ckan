@@ -48,7 +48,8 @@ spec:
             backend:
               service:
                 name: {{ .service }}
-                port: {{ .port }}
+                port:
+                  number: {{ .port }}
           {{- end }}
     {{- end }}
 {{- end }}

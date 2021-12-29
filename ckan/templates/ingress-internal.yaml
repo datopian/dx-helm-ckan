@@ -54,10 +54,12 @@ spec:
               service:
                 {{ if $.Values.general.maintenance }}
                 name: maintenance-svc
-                port: 80
+                port:
+                  number: 80
                 {{ else }}
                 name: {{ .service }}
-                port: {{ .port }}
+                port:
+                  number: {{ .port }}
               {{ end }}
           {{- end }}
     {{- end }}
