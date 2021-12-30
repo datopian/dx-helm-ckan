@@ -11,7 +11,9 @@ data:
         sql_string = str(sql_string)
         sql_string = sql_string.split('://')[1]
         database = sql_string.split('/')[-1]
-        username, password = sql_string.split('@')[0].split(':')
+        username, password = sql_string.split(':')
+        # In case of AzureSQL users also have @ in usernames Eg postgresadmin@xyzpostgres
+        password = password.split('@')[0]
         print(database, username, password)
 
     if __name__ == "__main__":
@@ -32,7 +34,7 @@ data:
         echo $DATABASE
         ( [ -z "${POSTGRES_HOST}" ] || [ -z "${POSTGRES_SUPERUSER}" ] || [ -z "${USER}" ] || [ -z "${PASSWORD}" ] ) && return 1
         echo Initializing ${USER} on ${POSTGRES_HOST}
-        
+
         # Create ROLE
         if [ "$( psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -tAc "SELECT 1 FROM pg_catalog.pg_roles where rolname ='${USER}';" )" = '1' ]
         then
@@ -80,7 +82,7 @@ data:
         local DS_DATABASE="${1}"
         local DS_RW_USER="${2}"
         local DS_RO_USER="${3}"
-        
+
         psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -d "${DATABASE}" -c "
         GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"${DS_RO_USER}\";
         ALTER DEFAULT PRIVILEGES FOR USER \"${DS_RW_USER}\" IN SCHEMA public GRANT SELECT ON TABLES TO \"${DS_RO_USER}\";
@@ -170,11 +172,11 @@ data:
             GRANT \"${CKAN_USER}\" to "${POSTGRES_SUPERUSER}";
             GRANT \"${DS_RW_USER}\" to "${POSTGRES_SUPERUSER}";
             GRANT \"${DS_RO_USER}\" to "${POSTGRES_SUPERUSER}";
-            
+
             ALTER DATABASE \"${CKAN_USER}\" OWNER TO \"${CKAN_USER}\";
             ALTER DATABASE \"${DS_RW_USER}\" OWNER TO \"${DS_RW_USER}\";
         "
-    
+
         psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -d "${DS_DATABASE}" -c "
             -- revoke permissions for the read-only user
             REVOKE CREATE ON SCHEMA public FROM PUBLIC;
@@ -203,36 +205,36 @@ data:
         PGPASSWORD="${DS_RW_PASSWORD}" psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${DS_RW_USER}" -d "${DS_RW_USER}" -c "
             GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"${DS_RO_USER}\";
             ALTER DEFAULT PRIVILEGES FOR USER \"${DS_RW_USER}\" IN SCHEMA public GRANT SELECT ON TABLES TO \"${DS_RO_USER}\";
-        " 
+        "
 
         ! datastore "$DS_DATABASE" "$DS_RW_USER" "$DS_RO_USER" && return 1
-    
+
     }
-        
+
     init(){
 
         # Setting Global Env
         POSTGRES_USER="${POSTGRES_USER}"
         POSTGRES_HOST="${CKAN_CLOUD_POSTGRES_HOST}"
-        
+
         CKAN_URL="${CKAN_SQLALCHEMY_URL}"
         DATASTORE_WRITE_URL="${CKAN__DATASTORE__WRITE_URL}"
         DATASTORE_READ_URL="${CKAN__DATASTORE__READ_URL}"
-        
-        echo "Setting the ENV from the SQL String for CKAN"        
+
+        echo "Setting the ENV from the SQL String for CKAN"
         ckan_database=($(python3 /etc/config/get_details.py "${CKAN_URL}"))
-        
+
         export CKAN_DB=${ckan_database[0]}
         export CKAN_DB_USERNAME=${ckan_database[1]}
         export CKAN_DB_PASSWORD=${ckan_database[2]}
-        
+
 
         echo Using centralized DB
         echo $CKAN_DB
         ! create_ckan_db "${POSTGRES_HOST}" "${POSTGRES_USER:-postgres}" "${CKAN_DB_USERNAME}" "${CKAN_DB_PASSWORD}" "${CKAN_DB}" \
             && echo "TEST"
 
-        echo "Setting the ENV from the SQL String for CKAN"        
+        echo "Setting the ENV from the SQL String for CKAN"
         datastore_write=($(python3 /etc/config/get_details.py "${DATASTORE_WRITE_URL}"))
         export DS_DB=${datastore_write[0]}
         export DS_RW_USER=${datastore_write[1]}
@@ -241,7 +243,7 @@ data:
         datastore_read=($(python3 /etc/config/get_details.py "${DATASTORE_READ_URL}"))
         export DS_RO_USER=${datastore_read[1]}
         export DS_RO_PASS=${datastore_read[2]}
-        
+
 
         ! create_datastore_db "${POSTGRES_HOST}" "${POSTGRES_USER:-postgres}" "${CKAN_DB_USERNAME}" \
                                 "${DS_RW_USER}" "${DS_RW_PASS}" \
