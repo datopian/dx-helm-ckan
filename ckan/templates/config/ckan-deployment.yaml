@@ -31,26 +31,29 @@ data:
         local USER="${3}"
         local PASSWORD="${4}"
         local DATABASE="${5}"
-        echo $DATABASE
+        if [[ "${POSTGRES_SUPERUSER}" == *"@"* ]]; then
+            DB_NAME_FOR_AZ="-d postgres"
+        fi
+
         ( [ -z "${POSTGRES_HOST}" ] || [ -z "${POSTGRES_SUPERUSER}" ] || [ -z "${USER}" ] || [ -z "${PASSWORD}" ] ) && return 1
         echo Initializing ${USER} on ${POSTGRES_HOST}
 
         # Create ROLE
-        if [ "$( psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -tAc "SELECT 1 FROM pg_catalog.pg_roles where rolname ='${USER}';" )" = '1' ]
+        if [ "$( psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" ${DB_NAME_FOR_AZ} -tAc "SELECT 1 FROM pg_catalog.pg_roles where rolname ='${USER}';" )" = '1' ]
         then
             echo "Role already exists"
         else
-            psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -c "
+            psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" ${DB_NAME_FOR_AZ} -c "
                 CREATE ROLE \"${USER}\" WITH LOGIN PASSWORD '${PASSWORD}' NOSUPERUSER NOCREATEDB NOCREATEROLE;
             "
         fi
 
         # Create Database
-        if [ "$( psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -tAc "SELECT 1 FROM pg_database WHERE datname='${DATABASE}';" )" = '1' ]
+        if [ "$( psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" ${DB_NAME_FOR_AZ} -tAc "SELECT 1 FROM pg_database WHERE datname='${DATABASE}';" )" = '1' ]
         then
             echo "Database already exists"
         else
-        psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -c "
+        psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" ${DB_NAME_FOR_AZ} -c "
             CREATE DATABASE \"${DATABASE}\";
         "
         fi
@@ -83,7 +86,7 @@ data:
         local DS_RW_USER="${2}"
         local DS_RO_USER="${3}"
 
-        psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -d "${DATABASE}" -c "
+        psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -d "${DS_DATABASE}" -c "
         GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"${DS_RO_USER}\";
         ALTER DEFAULT PRIVILEGES FOR USER \"${DS_RW_USER}\" IN SCHEMA public GRANT SELECT ON TABLES TO \"${DS_RO_USER}\";
 
@@ -153,28 +156,34 @@ data:
         local DS_RO_USER="${6}"
         local DS_RO_PASSWORD="${7}"
         local DS_DATABASE="${8}"
-        ! create_db_base "${POSTGRES_HOST}" "${POSTGRES_SUPERUSER}" "${DS_RW_USER}" "${DS_RW_PASSWORD}" "${DS_DATABASE}" && return 1
+        if [[ "${POSTGRES_SUPERUSER}" == *"@"* ]]; then
+            DB_NAME_FOR_AZ="-d postgres"
+        fi
+        POSTGRES_USER_HOSTLESS=$(echo $POSTGRES_USER | cut -f1 -d"@")
+        CKAN_DATABASE=$(echo $CKAN_USER | cut -f1 -d"@")
+        DATASTORE_DATABASE=$(echo $DS_RW_USER | cut -f1 -d"@")
+
+       ! create_db_base "${POSTGRES_HOST}" "${POSTGRES_SUPERUSER}" "${DS_RW_USER}" "${DS_RW_PASSWORD}" "${DS_DATABASE}" && return 1
         ( [ -z "${CKAN_USER}" ] || [ -z "${DS_RO_USER}" ] || [ -z "${DS_RO_PASSWORD}" ] ) && return 1
         echo Initializing datastore DB ${DS_RW_USER} on ${POSTGRES_HOST}
 
         # Create ROLE
-        if [ "$( psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -tAc "SELECT 1 FROM pg_catalog.pg_roles where rolname ='${DS_RO_USER}';" )" = '1' ]
+        if [ "$( psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" ${DB_NAME_FOR_AZ} -tAc "SELECT 1 FROM pg_catalog.pg_roles where rolname ='${DS_RO_USER}';" )" = '1' ]
         then
             echo "Role already exists"
         else
-            psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -c "
+            psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" ${DB_NAME_FOR_AZ} -c "
                 CREATE ROLE \"${DS_RO_USER}\" WITH LOGIN PASSWORD '${DS_RO_PASSWORD}' NOSUPERUSER NOCREATEDB NOCREATEROLE;
             "
         fi
 
-
         psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -d "${DS_DATABASE}" -c "
-            GRANT \"${CKAN_USER}\" to "${POSTGRES_SUPERUSER}";
-            GRANT \"${DS_RW_USER}\" to "${POSTGRES_SUPERUSER}";
-            GRANT \"${DS_RO_USER}\" to "${POSTGRES_SUPERUSER}";
+            GRANT \"${CKAN_USER}\" to "${POSTGRES_USER_HOSTLESS}";
+            GRANT \"${DS_RW_USER}\" to "${POSTGRES_USER_HOSTLESS}";
+            GRANT \"${DS_RO_USER}\" to "${POSTGRES_USER_HOSTLESS}";
 
-            ALTER DATABASE \"${CKAN_USER}\" OWNER TO \"${CKAN_USER}\";
-            ALTER DATABASE \"${DS_RW_USER}\" OWNER TO \"${DS_RW_USER}\";
+            ALTER DATABASE \"${CKAN_DATABASE}\" OWNER TO \"${CKAN_USER}\";
+            ALTER DATABASE \"${DATASTORE_DATABASE}\" OWNER TO \"${DS_RW_USER}\";
         "
 
         psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -d "${DS_DATABASE}" -c "
@@ -189,10 +198,10 @@ data:
             GRANT USAGE ON SCHEMA public TO \"${DS_RW_USER}\";
 
             -- take connect permissions from main db
-            REVOKE CONNECT ON DATABASE \"${CKAN_USER}\" FROM \"${DS_RO_USER}\";
+            REVOKE CONNECT ON DATABASE \"${CKAN_DATABASE}\" FROM \"${DS_RO_USER}\";
 
             -- grant select permissions for read-only user
-            GRANT CONNECT ON DATABASE \"${DS_RW_USER}\" TO \"${DS_RO_USER}\";
+            GRANT CONNECT ON DATABASE \"${DATASTORE_DATABASE}\" TO \"${DS_RO_USER}\";
             GRANT USAGE ON SCHEMA public TO \"${DS_RO_USER}\";
 
             -- grant access to current tables and views to read-only user
@@ -202,7 +211,7 @@ data:
             ALTER DEFAULT PRIVILEGES FOR USER \"${DS_RW_USER}\" IN SCHEMA public
             GRANT SELECT ON TABLES TO \"${DS_RO_USER}\";
         " &&\
-        PGPASSWORD="${DS_RW_PASSWORD}" psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${DS_RW_USER}" -d "${DS_RW_USER}" -c "
+        PGPASSWORD="${DS_RW_PASSWORD}" psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${DS_RW_USER}" -d "${DATASTORE_DATABASE}" -c "
             GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"${DS_RO_USER}\";
             ALTER DEFAULT PRIVILEGES FOR USER \"${DS_RW_USER}\" IN SCHEMA public GRANT SELECT ON TABLES TO \"${DS_RO_USER}\";
         "
@@ -211,10 +220,10 @@ data:
 
     }
 
-    init(){
 
+    init(){
         # Setting Global Env
-        POSTGRES_USER="${POSTGRES_USER}"
+        POSTGRES_USER="${POSTGRES_USER:-${CKAN_CLOUD_POSTGRES_USER}}"
         POSTGRES_HOST="${CKAN_CLOUD_POSTGRES_HOST}"
 
         CKAN_URL="${CKAN_SQLALCHEMY_URL}"
@@ -230,7 +239,6 @@ data:
 
 
         echo Using centralized DB
-        echo $CKAN_DB
         ! create_ckan_db "${POSTGRES_HOST}" "${POSTGRES_USER:-postgres}" "${CKAN_DB_USERNAME}" "${CKAN_DB_PASSWORD}" "${CKAN_DB}" \
             && echo "TEST"
 
