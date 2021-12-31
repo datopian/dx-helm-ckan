@@ -9,9 +9,9 @@ metadata:
   name: {{ .Values.general.projectId }}-ingress-ckanmiddleware
   annotations:
     {{- if .Values.general.useProductionCerts }}
-    cert-manager.io/cluster-issuer: letsencrypt-production
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer | quote | default "letsencrypt-production" }}
     {{- else }}
-    cert-manager.io/cluster-issuer: letsencrypt-staging
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer | quote | default "letsencrypt-staging" }}
     {{- end }}
     kubernetes.io/ingress.class: {{ .Values.ingress.ingressClass | quote | default "nginx-production" }}
     {{ if .Values.giftless.enable }}

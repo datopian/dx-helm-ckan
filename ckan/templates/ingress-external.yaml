@@ -11,9 +11,9 @@ metadata:
     app: {{ .Values.general.projectId }}-external
   annotations:
     {{ if .Values.general.useProductionCerts }}
-    cert-manager.io/cluster-issuer: letsencrypt-production-external
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer | quote | default "letsencrypt-production-external" }}
     {{ else }}
-    cert-manager.io/cluster-issuer: letsencrypt-staging-external
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer | quote | default "letsencrypt-staging-external" }}
     {{ end }}
     kubernetes.io/ingress.class: {{ .Values.ingress.ingressClass | quote | default "nginx-production" }}
     {{ if .Values.giftless.enable }}

@@ -43,6 +43,7 @@ All the values that need to be overrider from the ckan chart should come under `
 
 - `ckan.ingress.enable` - Flag to enable Nginx Ingress
 - `ckan.ingress.ingressClass` - The name of the ingress to use [default: `nginx-production`]
+- `ckan.ingress.clusterIssuer` - The name of the ingress to use [default: `letsencrypt-production`, `letsencrypt-staging`]
 - `ckan.ingress.enableExternal` - Flag to enable Nginx Ingress for external domains
 - `ckan.ingress.enableExternalCertificate` - Flag to enable Nginx Ingress for external domains having their own certificate
 - `ckan.ingress.limitConnections` - Number of concurrent connection per IP. Value for `nginx.ingress.kubernetes.io/limit-connections` [default: `20`]
