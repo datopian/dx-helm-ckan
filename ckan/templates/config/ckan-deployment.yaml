@@ -236,7 +236,7 @@ data:
         export CKAN_DB=${ckan_database[0]}
         export CKAN_DB_USERNAME=${ckan_database[1]}
         export CKAN_DB_PASSWORD=${ckan_database[2]}
-        export CKAN_DB_USERNAME_HOSTLESS=$(echo $CKAN_DB | cut -f1 -d"@")
+        export CKAN_DB_USERNAME_HOSTLESS=$(echo $CKAN_DB_USERNAME | cut -f1 -d"@")
 
 
         echo Using centralized DB
@@ -250,22 +250,21 @@ data:
         export DS_DB=${datastore_write[0]}
         export DS_RW_USER=${datastore_write[1]}
         export DS_RW_PASS=${datastore_write[2]}
-        export DS_DB_RW_USER_HOSTLESS=$(echo $DS_DB | cut -f1 -d"@")
+        export DS_DB_RW_USER_HOSTLESS=$(echo $DS_RW_USER | cut -f1 -d"@")
 
         datastore_read=($(python3 /etc/config/get_details.py "${DATASTORE_READ_URL}"))
         export DS_RO_USER=${datastore_read[1]}
         export DS_RO_PASS=${datastore_read[2]}
-        export DS_DB_RO_USER_HOSTLESS=$(echo $DS_DB | cut -f1 -d"@")
+        export DS_DB_RO_USER_HOSTLESS=$(echo $DS_RO_USER | cut -f1 -d"@")
 
-
-        ! create_datastore_db "${POSTGRES_HOST}" "${POSTGRES_USER:-postgres}" "${CKAN_DB_USERNAME}" \
-                                "${DS_RW_USER}" "${DS_RW_PASS}" \
-                                "${DS_RO_USER}" "${DS_RO_PASS}" \
-                                "${DS_DB}" \
-            && echo "TEST"
         ! create_datastore_db "${POSTGRES_HOST}" "${POSTGRES_USER:-postgres}" "${CKAN_DB_USERNAME}" \
                                 "${DS_RW_USER_HOSTLESS}" "${DS_RW_PASS}" \
                                 "${DS_RO_USER_HOSTLESS}" "${DS_RO_PASS}" \
+                                "${DS_DB}" \
+            && echo "TEST"
+        ! create_datastore_db "${POSTGRES_HOST}" "${POSTGRES_USER:-postgres}" "${CKAN_DB_USERNAME}" \
+                                "${DS_RW_USER}" "${DS_RW_PASS}" \
+                                "${DS_RO_USER}" "${DS_RO_PASS}" \
                                 "${DS_DB}" \
             && echo "TEST"
         CENTRALIZED_DB=1
