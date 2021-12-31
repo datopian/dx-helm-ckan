@@ -29,6 +29,10 @@ All the values that need to be overrider from the ckan chart should come under `
   - `ckan.general.autoscaling.minReplicas` - Minimum number of replicas [default: `1`]
   - `ckan.general.autoscaling.targetCPUUtilizationPercentage` - Target CPU Utilization in Percentage [default: `80`]
   - `ckan.general.autoscaling.targetMemoryUtilizationPercentage` - Target Memory Utilization in Percentage [default: `80`]
+- `ckan.general.env` - Environment Variables for global use (EG Postgre Super User credentials)
+  - `ckan.general.env.POSTGRES_HOST` - Postgres Host
+  - `ckan.general.env.POSTGRES_SUPER_USER` - Postgres Super User username
+  - `ckan.general.env.POSTGRES_SUPER_USER_PASSWORD` - Postgres Super User password
 - `ckan.general.sealedSecrets` - Object containing metadata about sealed secrets
   - `ckan.general.sealedSecrets.enable` - Flag to enable scaled secrets [default: `true`]
   - `ckan.general.sealedSecrets.registry` - Private registry metadata
@@ -39,6 +43,7 @@ All the values that need to be overrider from the ckan chart should come under `
 
 - `ckan.ingress.enable` - Flag to enable Nginx Ingress
 - `ckan.ingress.ingressClass` - The name of the ingress to use [default: `nginx-production`]
+- `ckan.ingress.clusterIssuer` - The name of the ingress to use [default: `letsencrypt-production`, `letsencrypt-staging`]
 - `ckan.ingress.enableExternal` - Flag to enable Nginx Ingress for external domains
 - `ckan.ingress.enableExternalCertificate` - Flag to enable Nginx Ingress for external domains having their own certificate
 - `ckan.ingress.limitConnections` - Number of concurrent connection per IP. Value for `nginx.ingress.kubernetes.io/limit-connections` [default: `20`]

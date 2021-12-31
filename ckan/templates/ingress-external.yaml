@@ -1,8 +1,8 @@
 {{ if .Values.ingress.enableExternal }}
 {{ if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion }}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 {{ else }}
-apiVersion: extensions/v1beta1
+apiVersion: extensions/v1
 {{ end }}
 kind: Ingress
 metadata:
@@ -11,9 +11,9 @@ metadata:
     app: {{ .Values.general.projectId }}-external
   annotations:
     {{ if .Values.general.useProductionCerts }}
-    cert-manager.io/cluster-issuer: letsencrypt-production-external
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer | quote | default "letsencrypt-production-external" }}
     {{ else }}
-    cert-manager.io/cluster-issuer: letsencrypt-staging-external
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer | quote | default "letsencrypt-staging-external" }}
     {{ end }}
     kubernetes.io/ingress.class: {{ .Values.ingress.ingressClass | quote | default "nginx-production" }}
     {{ if .Values.giftless.enable }}
@@ -53,14 +53,18 @@ spec:
         paths:
           {{ range .paths }}
           - path: {{ .path }}
+            pathType: Prefix
             backend:
-              {{ if $.Values.general.maintenance }}
-              serviceName: maintenance-svc
-              servicePort: 80
-              {{ else }}
-              serviceName: {{ .service }}
-              servicePort: {{ .port }}
-              {{ end }}
+              service:
+                {{ if $.Values.general.maintenance }}
+                name: maintenance-svc
+                port:
+                  number: 80
+                {{ else }}
+                name: {{ .service }}
+                port:
+                  number: {{ .port }}
+                {{ end }}
           {{ end }}
     {{ end }}
     {{ end }}
