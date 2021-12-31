@@ -258,8 +258,8 @@ data:
         export DS_DB_RO_USER_HOSTLESS=$(echo $DS_RO_USER | cut -f1 -d"@")
 
         ! create_datastore_db "${POSTGRES_HOST}" "${POSTGRES_USER:-postgres}" "${CKAN_DB_USERNAME}" \
-                                "${DS_RW_USER_HOSTLESS}" "${DS_RW_PASS}" \
-                                "${DS_RO_USER_HOSTLESS}" "${DS_RO_PASS}" \
+                                "${DS_DB_RW_USER_HOSTLESS}" "${DS_RW_PASS}" \
+                                "${DS_DB_RO_USER_HOSTLESS}" "${DS_RO_PASS}" \
                                 "${DS_DB}" \
             && echo "TEST"
         ! create_datastore_db "${POSTGRES_HOST}" "${POSTGRES_USER:-postgres}" "${CKAN_DB_USERNAME}" \
