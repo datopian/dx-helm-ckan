@@ -48,7 +48,9 @@ ckan:
   envVarsSecretName: ckan-cloud-centeralized-sql
 
 frontend:
-  enbale: false
+  enable: false
+  hpa:
+    enable: false
 
 giftless:
   enable: false

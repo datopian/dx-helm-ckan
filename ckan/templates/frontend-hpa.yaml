@@ -1,0 +1,26 @@
+{{ if .Values.frontend.hpa.enable }}
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Values.general.projectId }}-frontend-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Values.general.projectId }}-frontend
+  minReplicas: {{ .Values.frontend.hpa.minReplicas | default 1 }}
+  maxReplicas: {{ .Values.frontend.hpa.maxReplicas | default 3 }}
+  metrics:
+  {{ if .Values.frontend.hpa.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: {{ .Values.frontend.hpa.targetCPUUtilizationPercentage }}
+  {{ end }}
+  {{ if .Values.frontend.hpa.targetMemoryUtilizationPercentage}}
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: {{ .Values.frontend.hpa.targetMemoryUtilizationPercentage }}
+  {{ end }}
+{{ end }}

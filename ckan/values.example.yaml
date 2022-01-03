@@ -158,6 +158,8 @@ ckan:
       WP_URL: https://datamy-awesome-projecteso.wordpress.com/
       WP_TOKEN: SecretToKen
       WP_SHOW_DRAFT: "true"
+    hpa:
+      enable: false
 
 
   datapusher:
