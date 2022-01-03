@@ -23,6 +23,8 @@ useProductionCerts: false
 
 datapusher:
   enable: false
+  hpa:
+    enable: false
   image:
     repository: registry.gitlab.com/viderum/docker-datapusher
     tag: cloud-datapusher-1-v9
@@ -32,6 +34,8 @@ ckan:
   useIni:
     enable: false
     iniPath: "/srv/app/production.ini"
+  hpa:
+    enable: false
   domain: ckan.ckan.staging.datopian.com
   image:
     repository: registry.gitlab.com/datopian/clients/datahub
@@ -81,7 +85,9 @@ ingress:
   hosts:
     - host: ckan.datahub.staging.datopian.com
       paths:
-        - /
+        - path: /(.*)
+          service: ckan-svc
+          port: 80
     - host: api.datahub.io
       isExternal: true
       paths:
@@ -127,4 +133,16 @@ solr:
 
 postgresql:
   enable: false
-  
+
+xloader:
+  env:
+    EXAMPLE_ENV: ""
+
+dataSubscriptions:
+  enable: false
+
+auth:
+  enable: false
+
+ckanmiddleware:
+  enable: false
