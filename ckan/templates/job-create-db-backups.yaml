@@ -1,3 +1,4 @@
+{{ if .Values.dbBackup.enable }}
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
@@ -45,3 +46,4 @@ spec:
               mc cp {{ .Values.general.projectId }}-datastore.tar.gz {{ .Values.general.projectId }}/dx-cluster-backup/database-backups/{{ .Values.general.projectId }}/$(date '+%d-%m-%y')/{{ .Values.general.projectId }}-datastore$(date '+%d%m%y%H%M%S').tar.gz
               echo Success
           restartPolicy: OnFailure
+{{ end }}

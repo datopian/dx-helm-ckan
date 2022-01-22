@@ -29,6 +29,13 @@ datapusher:
     repository: registry.gitlab.com/viderum/docker-datapusher
     tag: cloud-datapusher-1-v9
     pullPolicy: Always
+  resources:
+    limits:
+      cpu: 50m
+      memory: 300M
+    requests:
+      cpu: 50m
+      memory: 256M
 
 ckan:
   useIni:
@@ -36,6 +43,13 @@ ckan:
     iniPath: "/srv/app/production.ini"
   hpa:
     enable: false
+  resources:
+    limits:
+      cpu: 250m
+      memory: 1.2G
+    requests:
+      cpu: 200m
+      memory: 1G
   domain: ckan.ckan.staging.datopian.com
   image:
     repository: registry.gitlab.com/datopian/clients/datahub
@@ -55,6 +69,14 @@ frontend:
   enable: false
   hpa:
     enable: false
+  resources:
+    limits:
+      cpu: 250m
+      memory: 1.2G
+    requests:
+      cpu: 200m
+      memory: 1G
+
 
 giftless:
   enable: false
@@ -116,9 +138,9 @@ ingress:
 autoscaling:
   enable: false
   minReplicas: 1
-  maxReplicas: 100
+  maxReplicas: 10
   targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 60
 
 nodeSelector: {}
 
@@ -128,9 +150,24 @@ affinity: {}
 
 solr:
   enable: true
+  resources:
+    limits:
+      cpu: 100m
+      memory: 1G
+    requests:
+      cpu: 70m
+      memory: 800M
   image:
     tag: 6.6.6
     pullPolicy: Always
+  zookeeper:
+    resources:
+      limits:
+        cpu: 70m
+        memory: 512M
+      requests:
+        cpu: 50m
+        memory: 512M
 
 postgresql:
   enable: false
@@ -147,3 +184,6 @@ auth:
 
 ckanmiddleware:
   enable: false
+
+dbBackup:
+  enable: true
