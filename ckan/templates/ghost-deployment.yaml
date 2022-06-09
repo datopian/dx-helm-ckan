@@ -1,0 +1,72 @@
+{{ if .Values.auth.enable }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ghost-data-claim
+  labels:
+    app: ghost
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ghost
+  name: {{ .Values.general.projectId }}-ghost
+spec:
+  {{ if not .Values.ghost.hpa.enable }}
+  replicas: {{ .Values.ghost.replicaCount | default 2 }}
+  {{ end }}
+  selector:
+    matchLabels:
+      app: ghost
+  template:
+    metadata:
+      labels:
+        app: ghost
+    spec:
+      volumes:
+      - name: ghost-data
+        persistentVolumeClaim:
+          claimName: ghost-data-claim
+      containers:
+      - name: ghost
+        imagePullPolicy: Always
+        repository: {{REGISTRY_NAME}}.azurecr.io/ghost
+        {{ if .Values.ghost.image.digest }}
+        image: {{ .Values.ghost.image.repository  }}@{{ .Values.ghost.image.digest }}
+        {{ else }}
+        image: {{ .Values.ghost.image.repository" }}:{{ .Values.ghost.image.tag }}
+        {{ end }}
+        volumeMounts:
+          - mountPath: /var/lib/ghost/content
+            name: ghost-data
+        {{ if .Values.ghost.env }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.general.projectId }}-ghost-envvars
+        {{ end }}
+        resources:
+            {{ if .Values.ghost.resources }}
+            {{ with .Values.ghost.resources }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+            {{ else }}
+            limits:
+              cpu: 300m
+              memory: 1.2G
+            requests:
+              cpu: 100m
+              memory: 1G
+            {{ end }}
+        ports:
+        - name: http
+          containerPort: 2368
+          protocol: TCP
+      restartPolicy: Always
+{{end}}
