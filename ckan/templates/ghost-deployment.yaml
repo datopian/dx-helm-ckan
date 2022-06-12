@@ -1,4 +1,4 @@
-{{ if .Values.auth.enable }}
+{{ if .Values.ghost.enable }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
