@@ -36,8 +36,7 @@ spec:
           claimName: ghost-data-claim
       containers:
       - name: ghost
-        imagePullPolicy: Always
-        repository: {{REGISTRY_NAME}}.azurecr.io/ghost
+        imagePullPolicy: {{ .Values.ghost.image.pullPolicy | default "Always" }}
         {{ if .Values.ghost.image.digest }}
         image: {{ .Values.ghost.image.repository  }}@{{ .Values.ghost.image.digest }}
         {{ else }}
