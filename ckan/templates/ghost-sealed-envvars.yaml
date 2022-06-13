@@ -1,0 +1,17 @@
+{{ if .Values.ghost.env }}
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  annotations:
+    sealedsecrets.bitnami.com/cluster-wide: "true"
+  name: "{{ .Values.general.projectId }}-ghost-sealed-envvars"
+spec:
+  {{ with .Values.ghost.env }}
+  encryptedData:
+    {{ toYaml . | nindent 4 }}
+  {{ end }}
+  template:
+    metadata:
+      name: "{{ .Values.general.projectId }}-ghost-sealed-envvars"
+    type: Opaque
+{{ end }}
