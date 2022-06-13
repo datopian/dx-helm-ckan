@@ -38,9 +38,9 @@ spec:
       - name: ghost
         imagePullPolicy: {{ .Values.ghost.image.pullPolicy | default "Always" }}
         {{ if .Values.ghost.image.digest }}
-        image: {{ .Values.ghost.image.repository | default "gcr.io/datopian-dx/ghost-cms" }}@{{ .Values.ghost.image.digest }}
+        image: {{ .Values.ghost.image.repository }}@{{ .Values.ghost.image.digest }}
         {{ else }}
-        image: {{ .Values.ghost.image.repository | default "gcr.io/datopian-dx/ghost-cms" }}:{{ .Values.ghost.image.tag }}
+        image: {{ .Values.ghost.image.repository }}:{{ .Values.ghost.image.tag }}
         {{ end }}
         volumeMounts:
           - mountPath: /var/lib/ghost/content
