@@ -45,11 +45,11 @@ spec:
         volumeMounts:
           - mountPath: /var/lib/ghost/content
             name: ghost-data
-        {{ if .Values.ghost.env }}
-          envFrom:
-            - secretRef:
-                name: {{ .Values.general.projectId }}-ghost-envvars
-        {{ end }}
+        envFrom:
+          {{ if .Values.ghost.env }}
+          - secretRef:
+              name: {{ .Values.general.projectId }}-ghost-envvars
+          {{ end }}
         resources:
             {{ if .Values.ghost.resources }}
             {{ with .Values.ghost.resources }}
