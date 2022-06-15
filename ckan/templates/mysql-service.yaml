@@ -1,0 +1,16 @@
+{{ if .Values.mysql.enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ghost-db
+  name: {{ .Values.general.projectId }}-db-svc
+spec:
+  ports:
+  - protocol: TCP
+    port: 3306
+    targetPort: 3306
+  selector:
+    app: ghost-db
+  type: ClusterIP
+{{end}}

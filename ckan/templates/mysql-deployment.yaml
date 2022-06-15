@@ -1,0 +1,71 @@
+{{ if .Values.mysql.enable }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ghost-db-data-claim
+  labels:
+    app: ghost-db
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ghost-db
+  name: {{ .Values.general.projectId }}-mysql-db
+spec:
+  {{ if not .Values.ghost.hpa.enable }}
+  replicas: {{ .Values.ghost.replicaCount | default 1 }}
+  {{ end }}
+  selector:
+    matchLabels:
+      app: ghost-db
+  template:
+    metadata:
+      labels:
+        app: ghost-db
+    spec:
+      volumes:
+      - name: ghost-db-data
+        persistentVolumeClaim:
+          claimName: ghost-db-data-claim
+      containers:
+      - imagePullPolicy: {{ .Values.mysql.image.pullPolicy | default "Always" }}
+        {{ if .Values.mysql.image.digest }}
+        image: {{ .Values.mysql.image.repository   }}@{{ .Values.mysql.image.digest }}
+        {{ else }}
+        image: {{ .Values.mysql.image.repository | default "mysql" }}:{{ .Values.mysql.image.tag | default "8.0-debian" }}
+        {{ end }}
+        name: mysql-db
+        volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: ghost-db-data
+        envFrom:
+          {{ if .Values.ghost.env }}
+          - secretRef:
+              name: {{ .Values.general.projectId }}-mysql-envvars
+          {{ end }}
+        resources:
+            {{ if .Values.ghost.resources }}
+            {{ with .Values.ghost.resources }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+            {{ else }}
+            limits:
+              cpu: 300m
+              memory: 1G
+            requests:
+              cpu: 100m
+              memory: 0.5G
+            {{ end }}
+        ports:
+        - name: http
+          containerPort: 3306
+          protocol: TCP
+      restartPolicy: Always
+{{end}}
