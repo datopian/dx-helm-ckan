@@ -50,6 +50,12 @@ spec:
           - secretRef:
               name: {{ .Values.general.projectId }}-ghost-envvars
           {{ end }}
+        {{ if .Values.ghost.livenessProbe }}
+          livenessProbe:
+            {{ with .Values.ghost.livenessProbe }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+        {{ end }}
         resources:
             {{ if .Values.ghost.resources }}
             {{ with .Values.ghost.resources }}
