@@ -1,5 +1,5 @@
 {{ if .Values.datapusher.hpa.enable }}
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ .Values.general.projectId }}-datapusher-hpa
