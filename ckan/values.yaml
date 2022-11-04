@@ -1,189 +1,144 @@
-# Default values for ckan.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
 general:
+  useProductionCerts: true
+  projectId: may-awesome-project
+  dockerconfigjson: SealedCredentialsForDockerCOntainerRegistry
+  imagePullSecrets: ckan-sealed-registry
+  customResource: true
+  resources: {}
   maintenance: false
-imagePullSecrets:
-  - name: ckan-sealed-registry
 
-nameOverride: ""
-fullnameOverride: ""
+ingress:
+  enable: true
+  enableExternal: false
+  enableExternalCertificate: false
+  hosts:
+    - host: ckan.my-awesome-project.staging.datopian.com
+      isExternal: false
+      paths:
+        - path: /(.*)
+          service: may-awesome-project-ckan-svc
+          port: 80
+    - host: my-awesome-project.staging.datopian.com
+      isExternal: false
+      paths:
+        - path: /(.*)
+          service: may-awesome-project-frontend-svc
+          port: web
+  tls:
+    - secretName: ckan.my-awesome-project.staging.datopian.com
+      hosts:
+        - ckan.my-awesome-project.staging.datopian.com
+    - secretName: my-awesome-project.staging.datopian.com
+      hosts:
+        - my-awesome-project.staging.datopian.com
 
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
-
-domain: ckan.staging.datopian.com
-useProductionCerts: false
-
-datapusher:
-  enable: false
-  hpa:
-    enable: false
+solr:
   image:
-    repository: registry.gitlab.com/viderum/docker-datapusher
-    tag: cloud-datapusher-1-v9
-    pullPolicy: Always
-  resources:
-    limits:
-      cpu: 50m
-      memory: 300M
-    requests:
-      cpu: 50m
-      memory: 256M
+    tag: 6.6.6
 
 ckan:
-  useIni:
-    enable: false
-    iniPath: "/srv/app/production.ini"
-  hpa:
-    enable: false
-  resources:
-    limits:
-      cpu: 250m
-      memory: 1.2G
-    requests:
-      cpu: 200m
-      memory: 1G
-  domain: ckan.ckan.staging.datopian.com
   image:
-    repository: registry.gitlab.com/datopian/clients/datahub
+    repository: viderum/ckan
     pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: latest
-  env:
-    EXAMPLE_ENV: ""
+    tag: 2.9.5
   service:
     type: ClusterIP
     port: 80
-
-  ckanOperatorImage: viderum/ckan-cloud-docker:cca-operator-latest
-  envVarsSecretName: ckan-cloud-centeralized-sql
+  hpa:
+    enable: true
+    targetMemoryUtilizationPercentage: 80
+  env:
+    CKAN___BEAKER__SESSION__URL: postgresql://my-awesome-project:Secret@11.22.333.444:5432/my-awesome-project
+    CKAN___BEAKER__SESSION__SECRET: Secret
+    CKAN___BEAKER__SESSION__TYPE: database
+    CKAN___BEAKER__SESSION__KEY: ckan
+    CKAN___BEAKER__SESSION__TABLE_NAME: beaker_sessions
+    CKAN_SQLALCHEMY_URL: postgresql://my-awesome-project:Secret@11.22.333.444:5432/my-awesome-project
+    CKAN__DATASTORE__READ_URL: postgresql://my-awesome-project-datastore-ro:Secret@11.22.333.444:5432/my-awesome-project-datastore
+    CKAN__DATASTORE__WRITE_URL: postgresql://my-awesome-project-datastore:Secret@11.22.333.444:5432/my-awesome-project-datastore
+    CKAN___LICENSES_GROUP_URL: file:///ext/licenses.json
+    CKAN___SCHEMING__DATASET_SCHEMAS: ckanext.scheming:ckan_dataset.json
+    CKAN___SCHEMING__PRESETS: ckanext.scheming:presets.json
+    CKAN__CORS__ORIGIN_ALLOW_ALL: "True"
+    CKAN__DATAPUSHER__URL: http://may-awesome-project-datapusher-svc:80/
+    CKAN__DATASETS_PER_PAGE: "25"
+    CKAN__HARVEST__MQ__TYPE: redis
+    CKAN__HIDE_ACTIVITY_FROM_USERS: my-awesome-project
+    CKAN__NATIONALGRID__DATA_SUBSCRIPTIONS_API_URL: http://may-awesome-project-data-subscriptions-svc:80/api/v1/
+    CKAN__RESOURCE_PROXY__MAX_FILE_SIZE: "100000000"
+    CKAN__SITE_TITLE: "My Awesome Project"
+    CKAN__STORAGE_PATH: /tmp
+    CKAN__TRACKING_ENABLED: "True"
+    CKAN__VIEWS__DEFAULT_VIEWS: "image_view recline_view pdf_view geojson_view"
+    CKAN_SITE_ID: my-awesome-project
+    CKAN_SITE_URL: https://ckan.my-awesome-project.staging.datopian.com
+    CKAN_SMTP_MAIL_FROM: noreply@my-awesome-projecteso.com
+    CKAN_SMTP_PASSWORD: Secret
+    CKAN_SMTP_SERVER: smtp.sendgrid.net:587
+    CKAN_SMTP_USER: apikey
+    CKAN_SOLR_URL: http://may-awesome-project-solr-svc:8983/solr/may-awesome-project
+    CKAN_SYSADMIN_EMAIL: test@datopian.com
+    CKAN_SYSADMIN_NAME: ckan_admin
+    CKAN_SYSADMIN_PASSWORD: secret
+    CKANEXT__PAGES_ALLOW_HTML: "True"
+    CKANEXT__PAGES_EDITOR: ckeditor
+    CKANEXT__S3FILESTORE__AWS_SECRET_ACCESS_KEY: Secret
+    CKANEXT__S3FILESTORE__AWS_ACCESS_KEY_ID: Secret
+    CKANEXT__S3FILESTORE__SIGNATURE_VERSION: s3v4
+    CKANEXT__S3FILESTORE__AWS_BUCKET_NAME: dx-may-awesome-project
+    CKANEXT__S3FILESTORE__AWS_STORAGE_PATH: may-awesome-project
+    CKANEXT__S3FILESTORE__REGION_NAME: europe-west1
+    CKANEXT__S3FILESTORE__HOST_NAME: https://storage.googleapis.com
+    CKANEXT__VALIDATION__PASS_AUTH_HEADER: "True"
+    CKANEXT__VALIDATION__PASS_AUTH_HEADER_VALUE: Secret
+    MAINTENANCE_MODE: "False"
 
 frontend:
   enable: false
+  image:
+    repository: datopian/frontend
+    tag: latest
+    pullPolicy: Always
   hpa:
     enable: false
-  resources:
-    limits:
-      cpu: 250m
-      memory: 1.2G
-    requests:
-      cpu: 200m
-      memory: 1G
 
+datapusher:
+  enable: true
+  image:
+    repository: datopian/datapusher
+    tag: latest
+    pullPolicy: Always
+  hpa:
+    enable: false
+
+dataSubscriptions:
+  enable: false
+  image:
+    repository: datopian/data-subscriptions
+    tag: latest
+    pullPolicy: Always
+
+auth:
+  enable: false
+  image:
+    repository: datopian/auth
+    tag: latest
+    pullPolicy: Always
 
 giftless:
   enable: false
   image:
     repository: datopian/giftless
-    tag: 0.1.1
-  port: 5000
-  project: datopian-dx
-  JwtRs256Key: "VerySecret"
-  JwtRs256KeyPub: "NotThatSecretButStill"
-  GoogleAccountCredentials: "ExtremlyTopSecret"
-
-sealedSecrets:
-  enable: true
-  ckan: {}
-  registry:
-    dockerconfigjson: "QuiteSecret"
-
-podAnnotations: {}
-
-podSecurityContext:
-  {}
-  # fsGroup: 2000resources: {}
-
-ingress:
-  enable: true
-  enableExternal: false
-  hosts:
-    - host: ckan.datahub.staging.datopian.com
-      paths:
-        - path: /(.*)
-          service: ckan-svc
-          port: 80
-    - host: api.datahub.io
-      isExternal: true
-      paths:
-        - path: /(.*)
-          service: ckan-svc
-          port: 80
-    - host: datahub.io
-      isExternal: true
-      paths:
-        - path: /(.*)
-          service: frontend-svc
-          port: 80
-  tls:
-    - secretName: ckan.datahub.staging.datopian.com
-      hosts:
-        - ckan.datahub.staging.datopian.com
-    - secretName: api.datahub.io
-      isExternal: true
-      hosts:
-        - api.datahub.io
-    - secretName: datahub.io
-      isExternal: true
-      hosts:
-        - datahub.io
-
-autoscaling:
-  enable: false
-  minReplicas: 1
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 60
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
-
-solr:
-  enable: true
-  resources:
-    limits:
-      cpu: 100m
-      memory: 1G
-    requests:
-      cpu: 70m
-      memory: 800M
-  image:
-    tag: 6.6.6
-    pullPolicy: Always
-  zookeeper:
-    resources:
-      limits:
-        cpu: 70m
-        memory: 512M
-      requests:
-        cpu: 50m
-        memory: 512M
+    tag: 0.1.2
 
 postgresql:
   enable: false
 
 xloader:
-  env:
-    EXAMPLE_ENV: ""
-
-dataSubscriptions:
   enable: false
 
-auth:
+dbBackup:
   enable: false
 
 ckanmiddleware:
   enable: false
-
-dbBackup:
-  enable: true

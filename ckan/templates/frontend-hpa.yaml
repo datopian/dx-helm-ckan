@@ -1,5 +1,5 @@
 {{ if .Values.frontend.hpa.enable }}
-apiVersion: autoscaling/v2beta1
+apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ .Values.general.projectId }}-frontend-hpa
@@ -15,12 +15,16 @@ spec:
     - type: Resource
       resource:
         name: cpu
-        targetAverageUtilization: {{ .Values.frontend.hpa.targetCPUUtilizationPercentage }}
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.frontend.hpa.targetCPUUtilizationPercentage }}
   {{ end }}
   {{ if .Values.frontend.hpa.targetMemoryUtilizationPercentage}}
     - type: Resource
       resource:
         name: memory
-        targetAverageUtilization: {{ .Values.frontend.hpa.targetMemoryUtilizationPercentage }}
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.frontend.hpa.targetMemoryUtilizationPercentage }}
   {{ end }}
 {{ end }}

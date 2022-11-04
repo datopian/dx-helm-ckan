@@ -1,6 +1,6 @@
 {{- if .Values.ckanmiddleware.enable -}}
 {{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 {{- else -}}
 apiVersion: extensions/v1beta1
 {{- end }}
@@ -17,7 +17,7 @@ metadata:
     {{ if .Values.giftless.enable }}
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header X-Forwarded-Prefix /_giftless;
-    {{ end }}
+    {{ end }}q
     nginx.ingress.kubernetes.io/proxy-read-timeout: "{{ .Values.ckanmiddleware.ingress.proxyReadTimeOut | default 60 }}"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "{{ .Values.ckanmiddleware.ingress.proxyConnectTimeout | default 60 }}"
     nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ckanmiddleware.ingress.proxyBodySize | default "1000M"}}
@@ -45,9 +45,16 @@ spec:
         paths:
           {{- range .paths }}
           - path: {{ .path }}
+            pathType: ImplementationSpecific
             backend:
-              serviceName: {{ .service }}
-              servicePort: {{ .port }}
+              service:
+                name: {{ .service }}
+                port:
+                   {{ if kindIs "float64" .port }}
+                  number: {{ .port }}
+                  {{ else }}
+                  name: {{ .port }}
+                  {{ end }}
           {{- end }}
     {{- end }}
 {{- end }}
