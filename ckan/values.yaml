@@ -33,10 +33,30 @@ ingress:
         - my-awesome-project.staging.datopian.com
 
 solr:
+  enable: true
+  resources:
+    limits:
+      cpu: 100m
+      memory: 1G
+    requests:
+      cpu: 70m
+      memory: 800M
   image:
     tag: 6.6.6
 
 ckan:
+  useIni:
+    enable: false
+    iniPath: "/srv/app/production.ini"
+  hpa:
+    enable: false
+  resources:
+    limits:
+      cpu: 250m
+      memory: 1.2G
+    requests:
+      cpu: 200m
+      memory: 1G
   image:
     repository: viderum/ckan
     pullPolicy: Always
@@ -44,9 +64,6 @@ ckan:
   service:
     type: ClusterIP
     port: 80
-  hpa:
-    enable: true
-    targetMemoryUtilizationPercentage: 80
   env:
     CKAN___BEAKER__SESSION__URL: postgresql://my-awesome-project:Secret@11.22.333.444:5432/my-awesome-project
     CKAN___BEAKER__SESSION__SECRET: Secret
@@ -101,6 +118,13 @@ frontend:
     pullPolicy: Always
   hpa:
     enable: false
+  resources:
+    limits:
+      cpu: 250m
+      memory: 1.2G
+    requests:
+      cpu: 200m
+      memory: 1G
 
 datapusher:
   enable: true

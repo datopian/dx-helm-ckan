@@ -17,7 +17,7 @@ metadata:
     {{ if .Values.giftless.enable }}
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header X-Forwarded-Prefix /_giftless;
-    {{ end }}q
+    {{ end }}
     nginx.ingress.kubernetes.io/proxy-read-timeout: "{{ .Values.ckanmiddleware.ingress.proxyReadTimeOut | default 60 }}"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "{{ .Values.ckanmiddleware.ingress.proxyConnectTimeout | default 60 }}"
     nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ckanmiddleware.ingress.proxyBodySize | default "1000M"}}
