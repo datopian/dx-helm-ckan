@@ -1,5 +1,5 @@
 {{ if .Values.datapusher.hpa.enable }}
-apiVersion: autoscaling/v2beta1
+apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ .Values.general.projectId }}-datapusher-hpa
@@ -15,12 +15,16 @@ spec:
     - type: Resource
       resource:
         name: cpu
-        targetAverageUtilization: {{ .Values.datapusher.hpa.targetCPUUtilizationPercentage }}
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.datapusher.hpa.targetCPUUtilizationPercentage }}
   {{ end }}
   {{ if .Values.datapusher.hpa.targetMemoryUtilizationPercentage}}
     - type: Resource
       resource:
         name: memory
-        targetAverageUtilization: {{ .Values.datapusher.hpa.targetMemoryUtilizationPercentage }}
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.datapusher.hpa.targetMemoryUtilizationPercentage }}
   {{ end }}
 {{ end }}
