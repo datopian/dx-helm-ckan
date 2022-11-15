@@ -65,50 +65,7 @@ ckan:
     type: ClusterIP
     port: 80
   env:
-    CKAN___BEAKER__SESSION__URL: postgresql://my-awesome-project:Secret@11.22.333.444:5432/my-awesome-project
-    CKAN___BEAKER__SESSION__SECRET: Secret
-    CKAN___BEAKER__SESSION__TYPE: database
-    CKAN___BEAKER__SESSION__KEY: ckan
-    CKAN___BEAKER__SESSION__TABLE_NAME: beaker_sessions
-    CKAN_SQLALCHEMY_URL: postgresql://my-awesome-project:Secret@11.22.333.444:5432/my-awesome-project
-    CKAN__DATASTORE__READ_URL: postgresql://my-awesome-project-datastore-ro:Secret@11.22.333.444:5432/my-awesome-project-datastore
-    CKAN__DATASTORE__WRITE_URL: postgresql://my-awesome-project-datastore:Secret@11.22.333.444:5432/my-awesome-project-datastore
-    CKAN___LICENSES_GROUP_URL: file:///ext/licenses.json
-    CKAN___SCHEMING__DATASET_SCHEMAS: ckanext.scheming:ckan_dataset.json
-    CKAN___SCHEMING__PRESETS: ckanext.scheming:presets.json
-    CKAN__CORS__ORIGIN_ALLOW_ALL: "True"
-    CKAN__DATAPUSHER__URL: http://may-awesome-project-datapusher-svc:80/
-    CKAN__DATASETS_PER_PAGE: "25"
-    CKAN__HARVEST__MQ__TYPE: redis
-    CKAN__HIDE_ACTIVITY_FROM_USERS: my-awesome-project
-    CKAN__NATIONALGRID__DATA_SUBSCRIPTIONS_API_URL: http://may-awesome-project-data-subscriptions-svc:80/api/v1/
-    CKAN__RESOURCE_PROXY__MAX_FILE_SIZE: "100000000"
-    CKAN__SITE_TITLE: "My Awesome Project"
-    CKAN__STORAGE_PATH: /tmp
-    CKAN__TRACKING_ENABLED: "True"
-    CKAN__VIEWS__DEFAULT_VIEWS: "image_view recline_view pdf_view geojson_view"
-    CKAN_SITE_ID: my-awesome-project
-    CKAN_SITE_URL: https://ckan.my-awesome-project.staging.datopian.com
-    CKAN_SMTP_MAIL_FROM: noreply@my-awesome-projecteso.com
-    CKAN_SMTP_PASSWORD: Secret
-    CKAN_SMTP_SERVER: smtp.sendgrid.net:587
-    CKAN_SMTP_USER: apikey
-    CKAN_SOLR_URL: http://may-awesome-project-solr-svc:8983/solr/may-awesome-project
-    CKAN_SYSADMIN_EMAIL: test@datopian.com
-    CKAN_SYSADMIN_NAME: ckan_admin
-    CKAN_SYSADMIN_PASSWORD: secret
-    CKANEXT__PAGES_ALLOW_HTML: "True"
-    CKANEXT__PAGES_EDITOR: ckeditor
-    CKANEXT__S3FILESTORE__AWS_SECRET_ACCESS_KEY: Secret
-    CKANEXT__S3FILESTORE__AWS_ACCESS_KEY_ID: Secret
-    CKANEXT__S3FILESTORE__SIGNATURE_VERSION: s3v4
-    CKANEXT__S3FILESTORE__AWS_BUCKET_NAME: dx-may-awesome-project
-    CKANEXT__S3FILESTORE__AWS_STORAGE_PATH: may-awesome-project
-    CKANEXT__S3FILESTORE__REGION_NAME: europe-west1
-    CKANEXT__S3FILESTORE__HOST_NAME: https://storage.googleapis.com
-    CKANEXT__VALIDATION__PASS_AUTH_HEADER: "True"
-    CKANEXT__VALIDATION__PASS_AUTH_HEADER_VALUE: Secret
-    MAINTENANCE_MODE: "False"
+   EXAMPLE_ENV: ""
 
 frontend:
   enable: false
