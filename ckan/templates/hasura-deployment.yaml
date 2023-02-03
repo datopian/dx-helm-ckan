@@ -1,0 +1,40 @@
+{{ if .Values.hasura.enable }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.general.projectId }}-hasura
+  labels:
+    app: hasura
+spec:
+  {{ if not .Values.hasura.hpa.enable }}
+  replicas: {{ .Values.hasura.replicaCount | default 1 }}
+  {{ end }}
+  selector:
+    matchLabels:
+      app: hasura
+  template:
+    metadata:
+      labels:
+        app: hasura
+    spec:
+      {{ if .Values.general.imagePullSecrets }}
+      imagePullSecrets:
+        - name: {{ .Values.general.imagePullSecrets }}
+      {{ end }}
+      containers:
+        - name: hasura
+          {{ if .Values.hasura.image.digest }}
+          image: {{ .Values.hasura.image.repository | default "hasura/graphql-engine" }}@{{ .Values.hasura.image.digest }}
+          {{ else }}
+          image: {{ .Values.hasura.image.repository | default "hasura/graphql-engine" }}:{{ .Values.hasura.image.tag }}
+          {{ end }}
+          {{ if .Values.hasura.env }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.general.projectId }}-hasura-envvars
+          {{ end }}
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            
+{{ end }}
