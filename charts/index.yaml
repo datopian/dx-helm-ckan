@@ -3,7 +3,7 @@ entries:
   ckan:
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.262928274+05:00"
+    created: "2023-02-03T20:32:28.524999236+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -14,7 +14,7 @@ entries:
       repository: https://charts.bitnami.com/bitnami
       version: 9.1.4
     description: The world's leading Open Source data portal platform.
-    digest: 1a73f61c40a5dd9a07ffa82fed3ef21e38b9f1887aeea036baa957324f6a1b4d
+    digest: 04668f529d3f12af1b5bff92cd9f4a406b44e6c25f8dd99013e9456eeceb9fc6
     name: ckan
     type: application
     urls:
@@ -22,7 +22,7 @@ entries:
     version: v3.0.2
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.255618915+05:00"
+    created: "2023-02-03T20:32:28.516179865+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -41,7 +41,7 @@ entries:
     version: v3.0.1
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.246661489+05:00"
+    created: "2023-02-03T20:32:28.509582659+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -60,7 +60,7 @@ entries:
     version: v3.0.0
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.239733403+05:00"
+    created: "2023-02-03T20:32:28.502964573+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -79,7 +79,7 @@ entries:
     version: v2.0.1
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.232600772+05:00"
+    created: "2023-02-03T20:32:28.496786279+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -98,7 +98,7 @@ entries:
     version: v2.0.0
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.224945759+05:00"
+    created: "2023-02-03T20:32:28.489160315+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -117,7 +117,7 @@ entries:
     version: v1.6.0-rc9
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.218517903+05:00"
+    created: "2023-02-03T20:32:28.482858168+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -136,7 +136,7 @@ entries:
     version: v1.6.0-rc8
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.211238774+05:00"
+    created: "2023-02-03T20:32:28.475838077+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -155,7 +155,7 @@ entries:
     version: v1.6.0-rc7
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.204492104+05:00"
+    created: "2023-02-03T20:32:28.470021304+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -174,7 +174,7 @@ entries:
     version: v1.6.0-rc6
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.197257879+05:00"
+    created: "2023-02-03T20:32:28.462913646+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -193,7 +193,7 @@ entries:
     version: v1.6.0-rc5
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.190932586+05:00"
+    created: "2023-02-03T20:32:28.454970068+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -212,7 +212,7 @@ entries:
     version: v1.6.0-rc4
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.184078738+05:00"
+    created: "2023-02-03T20:32:28.447146834+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -231,7 +231,7 @@ entries:
     version: v1.6.0-rc3
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.177584355+05:00"
+    created: "2023-02-03T20:32:28.440876862+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -250,7 +250,7 @@ entries:
     version: v1.6.0-rc2
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.16985892+05:00"
+    created: "2023-02-03T20:32:28.432498412+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -269,7 +269,7 @@ entries:
     version: v1.6.0-rc17
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.16146172+05:00"
+    created: "2023-02-03T20:32:28.425739203+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -288,7 +288,7 @@ entries:
     version: v1.6.0-rc16
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.154425187+05:00"
+    created: "2023-02-03T20:32:28.417806965+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -307,7 +307,7 @@ entries:
     version: v1.6.0-rc15
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.146583816+05:00"
+    created: "2023-02-03T20:32:28.410445959+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -326,7 +326,7 @@ entries:
     version: v1.6.0-rc14
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.138184346+05:00"
+    created: "2023-02-03T20:32:28.40102665+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -345,7 +345,7 @@ entries:
     version: v1.6.0-rc13
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.130960884+05:00"
+    created: "2023-02-03T20:32:28.392955582+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -364,7 +364,7 @@ entries:
     version: v1.6.0-rc12
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.123359173+05:00"
+    created: "2023-02-03T20:32:28.382182224+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -383,7 +383,7 @@ entries:
     version: v1.6.0-rc11
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.115774078+05:00"
+    created: "2023-02-03T20:32:28.372567653+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -402,7 +402,7 @@ entries:
     version: v1.6.0-rc1
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.109071428+05:00"
+    created: "2023-02-03T20:32:28.364394313+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -421,7 +421,7 @@ entries:
     version: v1.6.0-rc0
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.101505014+05:00"
+    created: "2023-02-03T20:32:28.354755892+05:00"
     dependencies:
     - name: solr
       repository: https://charts.bitnami.com/bitnami
@@ -439,7 +439,7 @@ entries:
     version: v1.5.0-rc1
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.018735713+05:00"
+    created: "2023-02-03T20:32:28.28050924+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -458,7 +458,7 @@ entries:
     version: v1.4.10
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.089825733+05:00"
+    created: "2023-02-03T20:32:28.343162943+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -477,7 +477,7 @@ entries:
     version: v1.4.9
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.083280508+05:00"
+    created: "2023-02-03T20:32:28.336382916+05:00"
     dependencies:
     - condition: solr.enable
       name: solr
@@ -496,7 +496,7 @@ entries:
     version: v1.4.8
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.076435707+05:00"
+    created: "2023-02-03T20:32:28.328517089+05:00"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -514,7 +514,7 @@ entries:
     version: v1.4.7
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.068484881+05:00"
+    created: "2023-02-03T20:32:28.321669432+05:00"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -532,7 +532,7 @@ entries:
     version: v1.4.6-rc0
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.060312142+05:00"
+    created: "2023-02-03T20:32:28.31353546+05:00"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -550,7 +550,7 @@ entries:
     version: v1.4.5
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.050433838+05:00"
+    created: "2023-02-03T20:32:28.306245206+05:00"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -568,7 +568,7 @@ entries:
     version: v1.4.4
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.041392981+05:00"
+    created: "2023-02-03T20:32:28.297462383+05:00"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -586,7 +586,7 @@ entries:
     version: v1.4.3
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.03021783+05:00"
+    created: "2023-02-03T20:32:28.289970716+05:00"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -604,7 +604,7 @@ entries:
     version: v1.4.2
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:59.008751774+05:00"
+    created: "2023-02-03T20:32:28.270158159+05:00"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -622,7 +622,7 @@ entries:
     version: v1.4.1
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:58.996914235+05:00"
+    created: "2023-02-03T20:32:28.260486915+05:00"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -640,7 +640,7 @@ entries:
     version: v1.4.0
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:58.98261438+05:00"
+    created: "2023-02-03T20:32:28.248309813+05:00"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -658,7 +658,7 @@ entries:
     version: v1.4.0-rc6
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:58.959639638+05:00"
+    created: "2023-02-03T20:32:28.233887459+05:00"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -676,7 +676,7 @@ entries:
     version: v1.4.0-rc1
   - apiVersion: v2
     appVersion: 2.8.2
-    created: "2023-02-03T20:21:58.942763618+05:00"
+    created: "2023-02-03T20:32:28.214293373+05:00"
     dependencies:
     - name: solr
       repository: http://storage.googleapis.com/kubernetes-charts-incubator
@@ -692,4 +692,4 @@ entries:
     urls:
     - https://raw.githubusercontent.com/datopian/dx-helm-ckan/enable/data_api/charts/ckan-v1.3.0.tgz
     version: v1.3.0
-generated: "2023-02-03T20:21:58.924032661+05:00"
+generated: "2023-02-03T20:32:28.198419496+05:00"

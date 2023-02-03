@@ -1,4 +1,4 @@
-{{ if .Values.data-api.enable }}
+{{ if .Values.dataAPI.enable }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,8 +6,8 @@ metadata:
   labels:
     app: data-api
 spec:
-  {{ if not .Values.data-api.hpa.enable }}
-  replicas: {{ .Values.data-api.replicaCount | default 1 }}
+  {{ if not .Values.dataAPI.hpa.enable }}
+  replicas: {{ .Values.dataAPI.replicaCount | default 1 }}
   {{ end }}
   selector:
     matchLabels:
@@ -23,26 +23,26 @@ spec:
       {{ end }}
       containers:
         - name: data-api
-          {{ if .Values.data-api.image.digest }}
-          image: {{ .Values.data-api.image.repository | default "datopian/data-api" }}@{{ .Values.data-api.image.digest }}
+          {{ if .Values.dataAPI.image.digest }}
+          image: {{ .Values.dataAPI.image.repository | default "datopian/data-api" }}@{{ .Values.dataAPI.image.digest }}
           {{ else }}
-          image: {{ .Values.data-api.image.repository | default "datopian/data-api" }}:{{ .Values.data-api.image.tag }}
+          image: {{ .Values.dataAPI.image.repository | default "datopian/data-api" }}:{{ .Values.dataAPI.image.tag }}
           {{ end }}
-          imagePullPolicy: {{ .Values.data-api.image.pullPolicy | default "Always" }}
-          {{ if .Values.data-api.env }}
+          imagePullPolicy: {{ .Values.dataAPI.image.pullPolicy | default "Always" }}
+          {{ if .Values.dataAPI.env }}
           envFrom:
             - secretRef:
                 name: {{ .Values.general.projectId }}-data-api-envvars
           {{ end }}
-          {{ if .Values.data-api.livenessProbe }}
+          {{ if .Values.dataAPI.livenessProbe }}
           livenessProbe:
-            {{ with .Values.data-api.livenessProbe }}
+            {{ with .Values.dataAPI.livenessProbe }}
             {{ toYaml . | nindent 12 }}
             {{ end }}
           {{ end }}
           resources:
-            {{ if .Values.data-api.resources }}
-            {{ with .Values.data-api.resources }}
+            {{ if .Values.dataAPI.resources }}
+            {{ with .Values.dataAPI.resources }}
             {{ toYaml . | nindent 12 }}
             {{ end }}
             {{ else }}
