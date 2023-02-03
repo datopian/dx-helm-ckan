@@ -1,0 +1,17 @@
+{{ if .Values.data-api.enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.general.projectId }}-data-api-svc
+spec:
+  type: {{ .Values.data-api.serviceType | default "ClusterIP" }}
+  ports:
+    - port: {{ .Values.data-api.port | default 80 }}
+      targetPort: {{ .Values.data-api.targetPort | default 3000 }}
+      protocol: TCP
+      name: http
+  selector:
+    app: data-api
+{{ end }}
+
+

@@ -33,6 +33,19 @@ spec:
             - secretRef:
                 name: {{ .Values.general.projectId }}-hasura-envvars
           {{ end }}
+          resources:
+            {{ if .Values.hasura.resources }}
+            {{ with .Values.hasura.resources }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+            {{ else }}
+            limits:
+              cpu: 600m
+              memory: 1G
+            requests:
+              cpu: 100m
+              memory: 0.8G
+            {{ end }}
           ports:
             - containerPort: 8080
               protocol: TCP
