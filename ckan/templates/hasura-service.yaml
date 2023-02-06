@@ -1,0 +1,15 @@
+{{ if .Values.hasura.enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.general.projectId }}-hasura-svc
+spec:
+  type: {{ .Values.hasura.serviceType | default "ClusterIP" }}
+  ports:
+    - port: {{ .Values.hasura.port | default 80 }}
+      targetPort: {{ .Values.hasura.targetPort | default 8080 }}
+      protocol: TCP
+      name: http
+  selector:
+    app: hasura
+{{ end }}

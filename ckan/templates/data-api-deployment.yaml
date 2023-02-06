@@ -1,0 +1,60 @@
+{{ if .Values.dataAPI.enable }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.general.projectId }}-data-api
+  labels:
+    app: data-api
+spec:
+  {{ if not .Values.dataAPI.hpa.enable }}
+  replicas: {{ .Values.dataAPI.replicaCount | default 1 }}
+  {{ end }}
+  selector:
+    matchLabels:
+      app: data-api
+  template:
+    metadata:
+      labels:
+        app: data-api
+    spec:
+      {{ if .Values.general.imagePullSecrets }}
+      imagePullSecrets:
+        - name: {{ .Values.general.imagePullSecrets }}
+      {{ end }}
+      containers:
+        - name: data-api
+          {{ if .Values.dataAPI.image.digest }}
+          image: {{ .Values.dataAPI.image.repository | default "datopian/data-api" }}@{{ .Values.dataAPI.image.digest }}
+          {{ else }}
+          image: {{ .Values.dataAPI.image.repository | default "datopian/data-api" }}:{{ .Values.dataAPI.image.tag }}
+          {{ end }}
+          imagePullPolicy: {{ .Values.dataAPI.image.pullPolicy | default "Always" }}
+          {{ if .Values.dataAPI.env }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.general.projectId }}-data-api-envvars
+          {{ end }}
+          {{ if .Values.dataAPI.livenessProbe }}
+          livenessProbe:
+            {{ with .Values.dataAPI.livenessProbe }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+          {{ end }}
+          resources:
+            {{ if .Values.dataAPI.resources }}
+            {{ with .Values.dataAPI.resources }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+            {{ else }}
+            limits:
+              cpu: 600m
+              memory: 1G
+            requests:
+              cpu: 100m
+              memory: 0.8G
+            {{ end }}
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+            
+{{ end }}
