@@ -15,12 +15,16 @@ spec:
     - type: Resource
       resource:
         name: cpu
-        targetAverageUtilization: {{ .Values.datapusher.hpa.targetCPUUtilizationPercentage }}
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.datapusher.hpa.targetCPUUtilizationPercentage }}
   {{ end }}
   {{ if .Values.datapusher.hpa.targetMemoryUtilizationPercentage}}
     - type: Resource
       resource:
         name: memory
-        targetAverageUtilization: {{ .Values.datapusher.hpa.targetMemoryUtilizationPercentage }}
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.datapusher.hpa.targetMemoryUtilizationPercentage }}
   {{ end }}
 {{ end }}
