@@ -123,3 +123,9 @@ dbBackup:
 
 ckanmiddleware:
   enable: false
+
+hasura:
+  enable: false
+
+dataAPI:
+  enable: false
