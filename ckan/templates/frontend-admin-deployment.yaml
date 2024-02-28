@@ -1,0 +1,67 @@
+{{- if .Values.frontend-admin.enable -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.general.projectId }}-frontend-admin
+  labels:
+    app: frontend-admin
+spec:
+  {{ if not .Values.frontend-admin.hpa.enable }}
+  replicas: {{ .Values.frontend-admin.replicaCount | default 2 }}
+  {{ end }}
+  selector:
+    matchLabels:
+      app: frontend-admin
+  template:
+    metadata:
+      annotations:
+        timestamp: {{ now | quote }}
+      labels:
+        app: frontend-admin
+    spec:
+      {{ if .Values.general.imagePullSecrets }}
+      imagePullSecrets:
+        - name: {{ .Values.general.imagePullSecrets }}
+      {{ end }}
+      containers:
+        - name: frontend-admin
+          {{ if .Values.frontend-admin.image.digest }}
+          image: {{ .Values.frontend-admin.image.repository }}@{{ .Values.frontend-admin.image.digest }}
+          {{ else }}
+          image: {{ .Values.frontend-admin.image.repository }}:{{ .Values.frontend-admin.image.tag }}
+          {{ end }}
+
+          imagePullPolicy: {{ .Values.frontend-admin.image.pullPolicy | default "Always"}}
+          {{ if .Values.frontend-admin.env }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.general.projectId }}-frontend-admin-envvars
+          {{ end }}
+          ports:
+            - containerPort: 4000
+          {{ if .Values.frontend-admin.runAsRoot }}
+          securityContext:
+            runAsUser: 0
+          {{ end }}
+          {{ if .Values.frontend-admin.debug }}
+          command:
+            - bash
+            - "-c"
+            - "npm install -g nodemon && nodemon"
+          {{ end }}
+          {{ if .Values.frontend-admin.customCommand }}
+          command: [ {{ .Values.frontend-admin.customCommand }} ]
+          {{ end }}
+          {{ if .Values.frontend-admin.resources }}
+          resources:
+            {{ with .Values.frontend-admin.resources }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+          {{ end }}
+          {{ if .Values.frontend-admin.livenessProbe }}
+          livenessProbe:
+            {{ with .Values.frontend-admin.livenessProbe }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+          {{ end }}
+{{ end }}

@@ -1,0 +1,13 @@
+{{- if .Values.frontend-admin.enable -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.general.projectId }}-frontend-admin-svc
+spec:
+  ports:
+    - name: web
+      port: {{ .Values.frontend-admin.port | default 80 }}
+      targetPort: {{ .Values.frontend-admin.targetPort | default 4455 }}
+  selector:
+    app: frontend-admin
+{{ end }}
