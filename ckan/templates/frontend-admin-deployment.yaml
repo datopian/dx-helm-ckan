@@ -1,4 +1,4 @@
-{{- if .Values.frontend-admin.enable -}}
+{{- if .Values.frontendAdmin.enable -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,8 +6,8 @@ metadata:
   labels:
     app: frontend-admin
 spec:
-  {{ if not .Values.frontend-admin.hpa.enable }}
-  replicas: {{ .Values.frontend-admin.replicaCount | default 2 }}
+  {{ if not .Values.frontendAdmin.hpa.enable }}
+  replicas: {{ .Values.frontendAdmin.replicaCount | default 2 }}
   {{ end }}
   selector:
     matchLabels:
@@ -25,42 +25,42 @@ spec:
       {{ end }}
       containers:
         - name: frontend-admin
-          {{ if .Values.frontend-admin.image.digest }}
-          image: {{ .Values.frontend-admin.image.repository }}@{{ .Values.frontend-admin.image.digest }}
+          {{ if .Values.frontendAdmin.image.digest }}
+          image: {{ .Values.frontendAdmin.image.repository }}@{{ .Values.frontendAdmin.image.digest }}
           {{ else }}
-          image: {{ .Values.frontend-admin.image.repository }}:{{ .Values.frontend-admin.image.tag }}
+          image: {{ .Values.frontendAdmin.image.repository }}:{{ .Values.frontendAdmin.image.tag }}
           {{ end }}
 
-          imagePullPolicy: {{ .Values.frontend-admin.image.pullPolicy | default "Always"}}
-          {{ if .Values.frontend-admin.env }}
+          imagePullPolicy: {{ .Values.frontendAdmin.image.pullPolicy | default "Always"}}
+          {{ if .Values.frontendAdmin.env }}
           envFrom:
             - secretRef:
                 name: {{ .Values.general.projectId }}-frontend-admin-envvars
           {{ end }}
           ports:
             - containerPort: 4000
-          {{ if .Values.frontend-admin.runAsRoot }}
+          {{ if .Values.frontendAdmin.runAsRoot }}
           securityContext:
             runAsUser: 0
           {{ end }}
-          {{ if .Values.frontend-admin.debug }}
+          {{ if .Values.frontendAdmin.debug }}
           command:
             - bash
             - "-c"
             - "npm install -g nodemon && nodemon"
           {{ end }}
-          {{ if .Values.frontend-admin.customCommand }}
-          command: [ {{ .Values.frontend-admin.customCommand }} ]
+          {{ if .Values.frontendAdmin.customCommand }}
+          command: [ {{ .Values.frontendAdmin.customCommand }} ]
           {{ end }}
-          {{ if .Values.frontend-admin.resources }}
+          {{ if .Values.frontendAdmin.resources }}
           resources:
-            {{ with .Values.frontend-admin.resources }}
+            {{ with .Values.frontendAdmin.resources }}
             {{ toYaml . | nindent 12 }}
             {{ end }}
           {{ end }}
-          {{ if .Values.frontend-admin.livenessProbe }}
+          {{ if .Values.frontendAdmin.livenessProbe }}
           livenessProbe:
-            {{ with .Values.frontend-admin.livenessProbe }}
+            {{ with .Values.frontendAdmin.livenessProbe }}
             {{ toYaml . | nindent 12 }}
             {{ end }}
           {{ end }}
