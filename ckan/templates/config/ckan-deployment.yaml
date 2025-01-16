@@ -31,9 +31,7 @@ data:
         local USER="${3}"
         local PASSWORD="${4}"
         local DATABASE="${5}"
-        if [[ "${POSTGRES_SUPERUSER}" == *"@"* ]]; then
-            DB_NAME_FOR_AZ="-d postgres"
-        fi
+        DB_NAME_FOR_AZ="-d postgres"
 
         ( [ -z "${POSTGRES_HOST}" ] || [ -z "${POSTGRES_SUPERUSER}" ] || [ -z "${USER}" ] || [ -z "${PASSWORD}" ] ) && return 1
         echo Initializing ${USER} on ${POSTGRES_HOST}
