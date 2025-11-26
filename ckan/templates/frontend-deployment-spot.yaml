@@ -1,0 +1,114 @@
+{{- if .Values.frontend.spot.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.general.projectId }}-frontend-spot
+  labels:
+    app: frontend
+    spot: "true"
+spec:
+  {{ if not .Values.frontend.spot.hpa.enable }}
+  replicas: {{ .Values.frontend.spot.replicaCount | default 0 }}
+  {{ end }}
+
+  selector:
+    matchLabels:
+      app: frontend
+      spot: "true"
+
+  template:
+    metadata:
+      annotations:
+        timestamp: {{ now | quote }}
+      labels:
+        app: frontend
+        spot: "true"
+
+    spec:
+      {{ if .Values.general.imagePullSecrets }}
+      imagePullSecrets:
+        - name: "{{ .Values.general.imagePullSecrets }}"
+      {{ end }}
+
+      ######## SPOT SCHEDULING ########
+      nodeSelector:
+{{ toYaml .Values.frontend.spot.nodeSelector | nindent 8 }}
+
+      tolerations:
+{{ toYaml .Values.frontend.spot.tolerations | nindent 8 }}
+
+      affinity:
+{{ toYaml .Values.frontend.spot.affinity | nindent 8 }}
+      ######## END SPOT SCHEDULING ########
+
+      {{ if .Values.frontend.runAsRoot }}
+      securityContext:
+        runAsUser: 0
+      {{ end }}
+
+      {{ if .Values.frontend.runInitContainers }}
+      initContainers:
+        - name: frontend-init
+          image: {{ .Values.frontend.initImage | default "busybox" | quote }}
+          command: ["sh", "-c", "echo frontend init done"]
+      {{ end }}
+
+      containers:
+        - name: frontend
+
+          {{ if .Values.frontend.image.digest }}
+          image: "{{ .Values.frontend.image.repository }}@{{ .Values.frontend.image.digest }}"
+          {{ else }}
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          {{ end }}
+
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy | default "Always" }}
+
+          {{ if .Values.frontend.env }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.general.projectId }}-frontend-envvars
+          {{ end }}
+
+          ports:
+            - containerPort: 4000
+              protocol: TCP
+
+          {{ if .Values.frontend.runAsRoot }}
+          securityContext:
+            runAsUser: 0
+          {{ end }}
+
+          {{ if .Values.frontend.debug }}
+          command:
+            - bash
+            - "-c"
+            - "npm install -g nodemon && nodemon"
+          {{ end }}
+
+          {{ if .Values.frontend.customCommand }}
+          command: [ {{ .Values.frontend.customCommand }} ]
+          {{ end }}
+
+          {{ if .Values.frontend.resources }}
+          resources:
+            {{ with .Values.frontend.resources }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+          {{ else }}
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2G
+            requests:
+              cpu: 500m
+              memory: 1G
+          {{ end }}
+
+          {{ if .Values.frontend.livenessProbe }}
+          livenessProbe:
+            {{ with .Values.frontend.livenessProbe }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+          {{ end }}
+{{- end }}

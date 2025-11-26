@@ -1,0 +1,24 @@
+{{- if and .Values.datapusher.enable .Values.datapusher.vpa.enable }}
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: {{ .Values.general.projectId }}-datapusher-vpa
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind: Deployment
+    name: {{ .Values.general.projectId }}-datapusher
+
+  updatePolicy:
+    updateMode: {{ .Values.datapusher.vpa.updateMode | default "Auto" | quote }}
+
+  resourcePolicy:
+    containerPolicies:
+      - containerName: datapusher
+        minAllowed:
+          cpu: {{ .Values.datapusher.vpa.minCPU | default "200m" | quote }}
+          memory: {{ .Values.datapusher.vpa.minMemory | default "512Mi" | quote }}
+        maxAllowed:
+          cpu: {{ .Values.datapusher.vpa.maxCPU | default "2000m" | quote }}
+          memory: {{ .Values.datapusher.vpa.maxMemory | default "6Gi" | quote }}
+{{- end }}

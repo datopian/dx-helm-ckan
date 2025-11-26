@@ -66,7 +66,30 @@ ckan:
     port: 80
   env:
    EXAMPLE_ENV: ""
-
+  spot:
+    enabled: false
+    hpa:
+      enable: true
+      minReplicas: 0
+      maxReplicas: 3
+      cpuTarget: 60
+      memoryTarget: 75
+    nodeSelector:
+      cloud.google.com/gke-spot: "true"
+    tolerations:
+      - key: "cloud.google.com/gke-spot"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: cloud.google.com/gke-spot
+                  operator: In
+                  values:
+                    - "true"
 frontend:
   enable: false
   image:
@@ -75,6 +98,13 @@ frontend:
     pullPolicy: Always
   hpa:
     enable: false
+  vpa:
+    enable: false
+    updateMode: "Auto"
+    minCPU: "200m"
+    minMemory: "512Mi"
+    maxCPU: "2000m"
+    maxMemory: "6Gi"
   resources:
     limits:
       cpu: 250m
@@ -82,6 +112,30 @@ frontend:
     requests:
       cpu: 200m
       memory: 1G
+  spot:
+    enabled: false
+    hpa:
+      enable: true
+      minReplicas: 0
+      maxReplicas: 3
+      cpuTarget: 60
+      memoryTarget: 75
+    nodeSelector:
+      cloud.google.com/gke-spot: "true"
+    tolerations:
+      - key: "cloud.google.com/gke-spot"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: cloud.google.com/gke-spot
+                  operator: In
+                  values:
+                    - "true"
 
 datapusher:
   enable: true
@@ -91,6 +145,37 @@ datapusher:
     pullPolicy: Always
   hpa:
     enable: false
+  vpa:
+    enable: false
+    updateMode: "Auto"
+    minCPU: "200m"
+    minMemory: "512Mi"
+    maxCPU: "2000m"
+    maxMemory: "6Gi"
+  spot:
+    enabled: false
+    hpa:
+      enable: true
+      minReplicas: 0
+      maxReplicas: 3
+      cpuTarget: 60
+      memoryTarget: 75
+    nodeSelector:
+      cloud.google.com/gke-spot: "true"
+    tolerations:
+      - key: "cloud.google.com/gke-spot"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: cloud.google.com/gke-spot
+                  operator: In
+                  values:
+                    - "true"
 
 dataSubscriptions:
   enable: false
@@ -117,6 +202,30 @@ postgresql:
 
 xloader:
   enable: false
+  spot:
+    enabled: false
+    hpa:
+      enable: true
+      minReplicas: 0
+      maxReplicas: 3
+      cpuTarget: 60
+      memoryTarget: 75
+    nodeSelector:
+      cloud.google.com/gke-spot: "true"
+    tolerations:
+      - key: "cloud.google.com/gke-spot"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: cloud.google.com/gke-spot
+                  operator: In
+                  values:
+                    - "true"
 
 dbBackup:
   enable: false

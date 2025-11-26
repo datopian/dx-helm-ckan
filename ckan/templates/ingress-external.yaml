@@ -10,29 +10,40 @@ metadata:
   labels:
     app: {{ .Values.general.projectId }}-external
   annotations:
-    {{ if .Values.general.useProductionCerts }}
-    cert-manager.io/cluster-issuer: letsencrypt-production-external
-    {{ else }}
-    cert-manager.io/cluster-issuer: letsencrypt-staging-external
-    {{ end }}
-    kubernetes.io/ingress.class: {{ .Values.ingress.ingressClass | quote | default "nginx-production" }}
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer | default (ternary "letsencrypt-production-external" "letsencrypt-staging-external" .Values.general.useProductionCerts) }}
+    kubernetes.io/ingress.class: {{ .Values.ingress.ingressClass | default "nginx-production" | quote }}
     {{ if .Values.giftless.enable }}
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header X-Forwarded-Prefix /_giftless;
     {{ end }}
     nginx.ingress.kubernetes.io/limit-connections: "{{ .Values.ingress.limitConnections | default 20 }}"
     nginx.ingress.kubernetes.io/limit-rps: "{{ .Values.ingress.limitRps | default 25 }}"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "{{ .Values.ingress.limitBurstMultiplier | default 3 }}"
+
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "{{ .Values.ingress.proxyConnectTimeout | default 60 }}"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "{{ .Values.ingress.proxyReadTimeOut | default 60 }}"
     nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingress.proxyBodySize | default "1000M" }}
     nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/use-regex: "true"
+
+    {{- if not (hasKey .Values.ingress.extraAnnotations "nginx.ingress.kubernetes.io/server-snippet") }}
+    nginx.ingress.kubernetes.io/server-snippet: |
+      add_header X-Frame-Options "DENY" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header Referrer-Policy "no-referrer-when-downgrade" always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+    {{- end }}
     {{ if .Values.ingress.extraAnnotations }}
     {{ with .Values.ingress.extraAnnotations }}
     {{ toYaml . | nindent 4 }}
     {{ end }}
     {{ end }}
 spec:
+  {{- if .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  {{- end }}
+
   {{ if .Values.ingress.external.tls }}
   tls:
     {{ range .Values.ingress.external.tls }}
@@ -45,6 +56,7 @@ spec:
     {{ end }}
     {{ end }}
   {{ end }}
+
   rules:
     {{ range .Values.ingress.external.hosts }}
     {{ if .isExternal }}
@@ -64,7 +76,7 @@ spec:
               service:
                 name: {{ .service }}
                 port:
-                   {{ if kindIs "float64" .port }}
+                  {{ if kindIs "float64" .port }}
                   number: {{ .port }}
                   {{ else }}
                   name: {{ .port }}
