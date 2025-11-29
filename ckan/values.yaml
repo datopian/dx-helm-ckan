@@ -11,6 +11,7 @@ ingress:
   enable: true
   enableExternal: false
   enableExternalCertificate: false
+  extraAnnotations: {}
   hosts:
     - host: ckan.my-awesome-project.staging.datopian.com
       isExternal: false
