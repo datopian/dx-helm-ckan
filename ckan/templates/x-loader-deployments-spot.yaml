@@ -1,0 +1,100 @@
+{{- if .Values.xloader.spot.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.general.projectId }}-xloader-spot
+  labels:
+    app: xloader
+    spot: "true"
+spec:
+  {{ if not .Values.xloader.spot.hpa.enable }}
+  replicas: {{ .Values.xloader.spot.replicaCount | default 0 }}
+  {{ end }}
+
+  selector:
+    matchLabels:
+      app: xloader
+      spot: "true"
+
+  template:
+    metadata:
+      annotations:
+        timestamp: {{ now | quote }}
+      labels:
+        app: xloader
+        spot: "true"
+
+    spec:
+      {{ if .Values.general.imagePullSecrets }}
+      imagePullSecrets:
+        - name: "{{ .Values.general.imagePullSecrets }}"
+      {{ end }}
+
+      ######## SPOT SCHEDULING ########
+      nodeSelector:
+{{ toYaml .Values.xloader.spot.nodeSelector | nindent 8 }}
+
+      tolerations:
+{{ toYaml .Values.xloader.spot.tolerations | nindent 8 }}
+
+      affinity:
+{{ toYaml .Values.xloader.spot.affinity | nindent 8 }}
+      ######## END SPOT SCHEDULING ########
+
+      {{ if .Values.xloader.runAsRoot }}
+      securityContext:
+        runAsUser: 0
+      {{ end }}
+
+      {{ if .Values.xloader.runInitContainers }}
+      initContainers:
+        - name: xloader-init
+          image: {{ .Values.xloader.initImage | default "busybox" | quote }}
+          command: ["sh", "-c", "echo xloader init done"]
+      {{ end }}
+
+      containers:
+        - name: xloader
+
+          {{ if .Values.xloader.image.digest }}
+          image: "{{ .Values.xloader.image.repository }}@{{ .Values.xloader.image.digest }}"
+          {{ else }}
+          image: "{{ .Values.xloader.image.repository }}:{{ .Values.xloader.image.tag }}"
+          {{ end }}
+
+          imagePullPolicy: {{ .Values.xloader.image.pullPolicy | default "Always" }}
+
+          envFrom:
+            {{ if .Values.ckan.env }}
+            - secretRef:
+                name: {{ .Values.general.projectId }}-ckan-envvars
+            {{ end }}
+            {{ if .Values.xloader.env }}
+            - secretRef:
+                name: {{ .Values.general.projectId }}-xloader-envvars
+            {{ end }}
+
+          {{ if .Values.xloader.customCommand }}
+          command: [ {{ .Values.xloader.customCommand }} ]
+          {{ end }}
+
+          resources:
+            {{ if .Values.xloader.spot.resources }}
+            {{ with .Values.xloader.spot.resources }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+            {{ else }}
+            limits:
+              cpu: 800m
+              memory: 1.5G
+            requests:
+              cpu: 400m
+              memory: 1G
+            {{ end }}
+
+          ports:
+            - containerPort: 8000
+              name: xloader
+            - containerPort: 9001
+              name: supervisor
+{{- end }}

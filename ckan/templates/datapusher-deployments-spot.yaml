@@ -1,0 +1,101 @@
+{{- if .Values.datapusher.spot.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.general.projectId }}-datapusher-spot
+spec:
+  replicas: {{ .Values.datapusher.spot.replicaCount | default 0 }}
+  selector:
+    matchLabels:
+      app: datapusher
+      spot: "true"
+  template:
+    metadata:
+      annotations:
+        timestamp: {{ now | quote }}
+      labels:
+        app: datapusher
+        spot: "true"
+    spec:
+      {{ if .Values.general.imagePullSecrets }}
+      imagePullSecrets:
+        - name: "{{ .Values.general.imagePullSecrets }}"
+      {{ end }}
+
+      serviceAccountName: {{ .Values.general.projectId }}
+
+      ######## SPOT SCHEDULING ########
+      nodeSelector:
+{{ toYaml .Values.datapusher.spot.nodeSelector | nindent 8 }}
+
+      tolerations:
+{{ toYaml .Values.datapusher.spot.tolerations | nindent 8 }}
+
+      affinity:
+{{ toYaml .Values.datapusher.spot.affinity | nindent 8 }}
+      ######## END SPOT SCHEDULING ########
+
+      {{ if .Values.datapusher.runAsRoot }}
+      securityContext:
+        runAsUser: 0
+      {{ end }}
+
+      {{ if .Values.datapusher.runInitContainers }}
+      initContainers:
+        - name: dp-init
+          image: "{{ .Values.datapusher.initImage | default "busybox" }}"
+          command: ["sh", "-c", "echo datapusher init done"]
+      {{ end }}
+
+      containers:
+        - name: datapusher
+          {{ if .Values.datapusher.env }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.general.projectId }}-datapusher-envvars
+          {{ end }}
+
+          {{ if .Values.datapusher.image.digest }}
+          image: "{{ .Values.datapusher.image.repository | default "registry.gitlab.com/viderum/docker-datapusher" }}@{{ .Values.datapusher.image.digest }}"
+          {{ else }}
+          image: "{{ .Values.datapusher.image.repository | default "registry.gitlab.com/viderum/docker-datapusher" }}:{{ .Values.datapusher.image.tag }}"
+          {{ end }}
+
+          imagePullPolicy: {{ .Values.datapusher.image.pullPolicy | default "Always" }}
+
+          {{ if .Values.datapusher.customCommand }}
+          command: [ {{ .Values.datapusher.customCommand }} ]
+          {{ end }}
+
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+
+          {{ if .Values.datapusher.livenessProbe }}
+          livenessProbe:
+            {{ with .Values.datapusher.livenessProbe }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+          {{ end }}
+
+          resources:
+            {{ if .Values.datapusher.spot.resources }}
+            {{ with .Values.datapusher.spot.resources }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+            {{ else }}
+            limits:
+              cpu: 1500m
+              memory: 4G
+            requests:
+              cpu: 800m
+              memory: 2G
+            {{ end }}
+
+      volumes:
+        {{ if .Values.datapusher.extraConfig }}
+        - name: datapusher-config
+          configMap:
+            name: datapusher-config
+        {{ end }}
+{{- end }}
