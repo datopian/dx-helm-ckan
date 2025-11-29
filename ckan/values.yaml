@@ -86,7 +86,7 @@ ckan:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
             - matchExpressions:
-                - key: gke-spot
+                - key: cloud.google.com/gke-spot
                   operator: In
                   values:
                     - "true"
