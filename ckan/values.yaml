@@ -77,7 +77,7 @@ ckan:
     nodeSelector:
       cloud.google.com/gke-spot: "true"
     tolerations:
-      - key: "cloud.google.com/gke-spot"
+      - key: "gke-spot"
         operator: "Equal"
         value: "true"
         effect: "NoSchedule"
@@ -86,7 +86,7 @@ ckan:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
             - matchExpressions:
-                - key: cloud.google.com/gke-spot
+                - key: gke-spot
                   operator: In
                   values:
                     - "true"
