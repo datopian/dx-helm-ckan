@@ -1,0 +1,16 @@
+{{ if .Values.ghost.enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ghost
+  name: {{ .Values.general.projectId }}-ghost-svc
+spec:
+  ports:
+  - protocol: TCP
+    port: 2368
+    targetPort: 2368
+  selector:
+    app: ghost
+  type: ClusterIP
+{{end}}
