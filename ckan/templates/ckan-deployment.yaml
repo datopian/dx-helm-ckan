@@ -28,11 +28,17 @@ spec:
       {{ if .Values.ckan.runInitContainers }}
       initContainers:
         - name: database
-          image: {{ .Values.ckan.ckanOperatorImage | quote | default "viderum/ckan-cloud-docker:cca-operator-latest" }}
+          image: {{ .Values.ckan.ckanOperatorImage | quote | default "postgres:16-alpine" }}
           command:
-          - bash
+          - sh
           - "-c"
           - |
+            # Dynamically install python3 and bash depending on the base image (Alpine vs Debian)
+            if command -v apk >/dev/null; then
+              apk add --no-cache python3 bash
+            elif command -v apt-get >/dev/null; then
+              apt-get update && apt-get install -y python3 bash
+            fi
             /etc/config/initContainer.sh &&\
             echo ckan DB initialized successfully && exit 0
             echo failed to initialize, waiting 1 hour before exiting && sleep 3600 && exit 1
