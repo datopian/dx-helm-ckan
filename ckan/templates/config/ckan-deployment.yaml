@@ -214,7 +214,6 @@ data:
             GRANT \"${DS_RW_USER}\" to \"${POSTGRES_SUPERUSER}\";
             GRANT \"${DS_RO_USER}\" to \"${POSTGRES_SUPERUSER}\";
         " || fail "Failed to grant role memberships."
-
         psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -d "${DS_DATABASE}" -c "
             -- revoke permissions for the read-only user
             REVOKE CREATE ON SCHEMA public FROM PUBLIC;
@@ -241,10 +240,7 @@ data:
             GRANT SELECT ON TABLES TO \"${DS_RO_USER}\";
         " || fail "Failed to configure schema permissions."
 
-        PGPASSWORD="${DS_RW_PASSWORD}" psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${DS_RW_USER}" -d "${DS_DATABASE}" -c "
-            GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"${DS_RO_USER}\";
-            ALTER DEFAULT PRIVILEGES FOR USER \"${DS_RW_USER}\" IN SCHEMA public GRANT SELECT ON TABLES TO \"${DS_RO_USER}\";
-        " || fail "Failed to assign default privileges for RW User."
+        # DELETED THE REDUNDANT PGPASSWORD BLOCK HERE
 
         datastore "${POSTGRES_HOST}" "${POSTGRES_SUPERUSER}" "$DS_DATABASE" "$DS_RW_USER" "$DS_RO_USER" "${CKAN_USER}"
     }
