@@ -236,15 +236,18 @@ data:
     }
         
     init(){
+        # Require SSL for Azure, but allow overrides for GKE/Local
+        export PGSSLMODE="${CKAN_DB_SSLMODE:-require}"
 
-        # Setting Global Env
-        POSTGRES_USER="${POSTGRES_USER}"
+        # The admin user creating the databases (postgresadmin)
+        POSTGRES_USER="${CKAN_CLOUD_POSTGRES_USER}"
         POSTGRES_HOST="${CKAN_CLOUD_POSTGRES_HOST}"
         
         CKAN_URL="${CKAN_SQLALCHEMY_URL}"
         DATASTORE_WRITE_URL="${CKAN__DATASTORE__WRITE_URL}"
         DATASTORE_READ_URL="${CKAN__DATASTORE__READ_URL}"
         
+        # --- 1. EXTRACT AND CREATE MAIN CKAN DB ---
         echo "Setting the ENV from the SQL String for CKAN"        
         ckan_database=($(python3 /etc/config/get_details.py "${CKAN_URL}"))
         
@@ -252,29 +255,28 @@ data:
         export CKAN_DB_USERNAME=${ckan_database[1]}
         export CKAN_DB_PASSWORD=${ckan_database[2]}
         
-
-        echo Using centralized DB
-        echo $CKAN_DB
+        echo "Using centralized DB: $CKAN_DB"
         ! create_ckan_db "${POSTGRES_HOST}" "${POSTGRES_USER:-postgres}" "${CKAN_DB_USERNAME}" "${CKAN_DB_PASSWORD}" "${CKAN_DB}" \
-            && echo "TEST"
+            && echo "CKAN DB Creation Failed"
 
-        echo "Setting the ENV from the SQL String for CKAN"        
+        # --- 2. EXTRACT AND CREATE DATASTORE DB & USERS ---
+        echo "Setting the ENV from the SQL String for Datastore Write"
         datastore_write=($(python3 /etc/config/get_details.py "${DATASTORE_WRITE_URL}"))
         export DS_DB=${datastore_write[0]}
         export DS_RW_USER=${datastore_write[1]}
         export DS_RW_PASS=${datastore_write[2]}
 
+        echo "Setting the ENV from the SQL String for Datastore Read"
         datastore_read=($(python3 /etc/config/get_details.py "${DATASTORE_READ_URL}"))
         export DS_RO_USER=${datastore_read[1]}
         export DS_RO_PASS=${datastore_read[2]}
         
-
         ! create_datastore_db "${POSTGRES_HOST}" "${POSTGRES_USER:-postgres}" "${CKAN_DB_USERNAME}" \
                                 "${DS_RW_USER}" "${DS_RW_PASS}" \
                                 "${DS_RO_USER}" "${DS_RO_PASS}" \
                                 "${DS_DB}" \
-            && echo "TEST"
-        CENTRALIZED_DB=1
+            && echo "Datastore DB Creation Failed"
 
+        CENTRALIZED_DB=1
     }
     init
