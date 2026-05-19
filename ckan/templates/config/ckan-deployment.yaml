@@ -83,6 +83,11 @@ data:
                 CREATE DATABASE \"${DATABASE}\";
             " || fail "Failed to create database '${DATABASE}'."
         fi
+
+        log "Enforcing ownership of '${DATABASE}' to '${USER}'..."
+        psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -d postgres -c "
+            ALTER DATABASE \"${DATABASE}\" OWNER TO \"${USER}\";
+        " || fail "Failed to set database ownership for '${DATABASE}'."
     }
 
     create_ckan_db() {
@@ -208,11 +213,8 @@ data:
             GRANT \"${CKAN_USER}\" to \"${POSTGRES_SUPERUSER}\";
             GRANT \"${DS_RW_USER}\" to \"${POSTGRES_SUPERUSER}\";
             GRANT \"${DS_RO_USER}\" to \"${POSTGRES_SUPERUSER}\";
-            
-            ALTER DATABASE \"${CKAN_USER}\" OWNER TO \"${CKAN_USER}\";
-            ALTER DATABASE \"${DS_RW_USER}\" OWNER TO \"${DS_RW_USER}\";
-        " || fail "Failed to grant role memberships or database ownership."
-    
+        " || fail "Failed to grant role memberships."
+
         psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -d "${DS_DATABASE}" -c "
             -- revoke permissions for the read-only user
             REVOKE CREATE ON SCHEMA public FROM PUBLIC;
