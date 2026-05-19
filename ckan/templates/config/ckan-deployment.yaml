@@ -139,13 +139,13 @@ data:
                 LEFT OUTER JOIN pg_class AS dependent ON d.refobjid = dependent.oid
             WHERE
                 (dependee.oid != dependent.oid OR dependent.oid IS NULL) AND
-                -- is a table (from pg_tables view definition)
-                -- or is a view (from pg_views view definition)
                 (dependee.relkind = 'r'::\"char\" OR dependee.relkind = 'v'::\"char\")
                 AND dependee.relnamespace = (
                     SELECT oid FROM pg_namespace WHERE nspname='public')
             ORDER BY dependee.oid DESC;
-        ALTER VIEW \"_table_metadata\" OWNER TO \"${CKAN_USER}\";
+
+        -- FIX 1: Change ownership from CKAN_USER to DS_RW_USER
+        ALTER VIEW \"_table_metadata\" OWNER TO \"${DS_RW_USER}\";
         GRANT SELECT ON \"_table_metadata\" TO \"${DS_RO_USER}\";
 
         CREATE OR REPLACE FUNCTION populate_full_text_trigger() RETURNS trigger
@@ -161,7 +161,9 @@ data:
                 RETURN NEW;
             END;
         \$body\$ LANGUAGE plpgsql;
-        ALTER FUNCTION populate_full_text_trigger() OWNER TO \"${CKAN_USER}\";
+
+        -- FIX 2: Change ownership from CKAN_USER to DS_RW_USER
+        ALTER FUNCTION populate_full_text_trigger() OWNER TO \"${DS_RW_USER}\";
 
         DO \$body\$
             BEGIN
