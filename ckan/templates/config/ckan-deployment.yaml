@@ -5,18 +5,39 @@ metadata:
 data:
   get_details.py: |
     #!/usr/bin/env python
-
     import sys
+    from urllib.parse import urlparse
+
     def get_details_from_sql_string(sql_string):
-        sql_string = str(sql_string)
-        sql_string = sql_string.split('://')[1]
-        database = sql_string.split('/')[-1]
-        username, password = sql_string.split('@')[0].split(':')
-        print(database, username, password)
+        try:
+            # Clean and parse the URI structure
+            parsed = urlparse(str(sql_string).strip())
+
+            # Extract database name cleanly (stripping leading slashes)
+            database = parsed.path.lstrip('/')
+
+            # Extract credentials safely
+            username = parsed.username or ''
+            password = parsed.password or ''
+
+            # Ensure we don't return partial data if things are missing
+            if not database or not username or not password:
+                raise ValueError("Missing database, username, or password component in connection string.")
+
+            # Print space-separated results as expected by your bash array read
+            print(f"{database} {username} {password}")
+
+        except Exception as e:
+            # Direct errors to standard error stream so bash knows something went wrong
+            sys.stderr.write(f"Parsing Error: {str(e)}\n")
+            sys.exit(1)
 
     if __name__ == "__main__":
-        sql_string = sys.argv[1]
-        get_details_from_sql_string(sql_string)
+        if len(sys.argv) > 1:
+            get_details_from_sql_string(sys.argv[1])
+        else:
+            sys.stderr.write("Error: No SQL connection string provided.\n")
+            sys.exit(1)
 
   initContainer.sh: |
     #!/usr/bin/env bash
@@ -77,11 +98,15 @@ data:
     }
 
     datastore() {
-        local DS_DATABASE="${1}"
-        local DS_RW_USER="${2}"
-        local DS_RO_USER="${3}"
+        # FIXED: Added host and superuser parameters explicitly
+        local POSTGRES_HOST="${1}"
+        local POSTGRES_SUPERUSER="${2}"
+        local DS_DATABASE="${3}"
+        local DS_RW_USER="${4}"
+        local DS_RO_USER="${5}"
+        local CKAN_USER="${6}"
         
-        psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -d "${DATABASE}" -c "
+        psql -v ON_ERROR_STOP=on -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPERUSER}" -d "${DS_DATABASE}" -c "
         GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"${DS_RO_USER}\";
         ALTER DEFAULT PRIVILEGES FOR USER \"${DS_RW_USER}\" IN SCHEMA public GRANT SELECT ON TABLES TO \"${DS_RO_USER}\";
 
@@ -205,7 +230,8 @@ data:
             ALTER DEFAULT PRIVILEGES FOR USER \"${DS_RW_USER}\" IN SCHEMA public GRANT SELECT ON TABLES TO \"${DS_RO_USER}\";
         " 
 
-        ! datastore "$DS_DATABASE" "$DS_RW_USER" "$DS_RO_USER" && return 1
+        # FIXED: Now passing parameters down to the updated datastore function signature
+        ! datastore "${POSTGRES_HOST}" "${POSTGRES_SUPERUSER}" "$DS_DATABASE" "$DS_RW_USER" "$DS_RO_USER" "${CKAN_USER}" && return 1
     
     }
         
