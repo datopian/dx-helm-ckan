@@ -29,6 +29,17 @@ spec:
               mc alias set {{ .Values.general.projectId }} $CKANEXT__S3FILESTORE__HOST_NAME $CKANEXT__S3FILESTORE__AWS_ACCESS_KEY_ID $CKANEXT__S3FILESTORE__AWS_SECRET_ACCESS_KEY --api $CKANEXT__S3FILESTORE__SIGNATURE_VERSION
               mc cp {{ .Values.general.projectId }}.tar.gz {{ .Values.general.projectId }}/dx-cluster-backup/database-backups/{{ .Values.general.projectId }}/$(date '+%d-%m-%y')/{{ .Values.general.projectId }}$(date '+%d%m%y%H%M%S').tar.gz
               echo Success
+            resources:
+              {{ if .Values.dbBackup.resources }}
+              {{ with .Values.dbBackup.resources }}
+              {{ toYaml . | nindent 12 }}
+              {{ end }}
+              {{ else }}
+              limits:
+                cpu: 500m
+              requests:
+                cpu: 200m
+              {{ end }}
           - name: job-datastore-db-backup
             envFrom:
               - secretRef:
@@ -45,5 +56,16 @@ spec:
               mc alias set {{ .Values.general.projectId }} $CKANEXT__S3FILESTORE__HOST_NAME $CKANEXT__S3FILESTORE__AWS_ACCESS_KEY_ID $CKANEXT__S3FILESTORE__AWS_SECRET_ACCESS_KEY --api $CKANEXT__S3FILESTORE__SIGNATURE_VERSION
               mc cp {{ .Values.general.projectId }}-datastore.tar.gz {{ .Values.general.projectId }}/dx-cluster-backup/database-backups/{{ .Values.general.projectId }}/$(date '+%d-%m-%y')/{{ .Values.general.projectId }}-datastore$(date '+%d%m%y%H%M%S').tar.gz
               echo Success
+            resources:
+              {{ if .Values.dbBackup.resources }}
+              {{ with .Values.dbBackup.resources }}
+              {{ toYaml . | nindent 12 }}
+              {{ end }}
+              {{ else }}
+              limits:
+                cpu: 500m
+              requests:
+                cpu: 200m
+              {{ end }}
           restartPolicy: OnFailure
 {{ end }}
