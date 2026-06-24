@@ -1,0 +1,15 @@
+{{- if and .Values.auth.enable .Values.auth.config }}
+{{- range $key, $value := .Values.auth.config }}
+  {{- if or (regexMatch "(?i)postgres(ql)?://" (toString $value)) (regexMatch "(?i)redis://" (toString $value)) (regexMatch "(?i)secret" $key) }}
+    {{- fail (printf "\n\n[SECURITY ERROR]: Detected sensitive data in '.Values.auth.config.%s'!\n" $key) }}
+  {{- end }}
+{{- end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Values.general.projectId }}-auth-env-config"
+data:
+  {{- with .Values.auth.config }}
+  {{ toYaml . | nindent 2 }}
+  {{- end }}
+{{- end }}

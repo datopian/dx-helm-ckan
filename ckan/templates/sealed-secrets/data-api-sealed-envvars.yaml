@@ -1,0 +1,17 @@
+{{- if and .Values.general.useSealedSecrets (and .Values.dataAPI.enable .Values.dataAPI.env) }}
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  annotations:
+    sealedsecrets.bitnami.com/cluster-wide: "true"
+  name: "{{ .Values.general.projectId }}-data-api-envvars"
+spec:
+  {{- with .Values.dataAPI.env }}
+  encryptedData:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      name: "{{ .Values.general.projectId }}-data-api-envvars"
+    type: Opaque
+{{- end }}

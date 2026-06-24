@@ -1,0 +1,18 @@
+{{ if .Values.ckan.config }}
+# Guardrail: Check if developers accidentally put sensitive connection strings into plain text config
+{{- range $key, $value := .Values.ckan.config }}
+  {{- if or (regexMatch "(?i)postgres(ql)?://" $value) (regexMatch "(?i)redis://" $value) }}
+    {{- fail (printf "\n\n[SECURITY ERROR]: Detected plain-text connection string in '.Values.ckan.config.%s'.\nAll credentials must be encrypted and placed under '.Values.ckan.env'!\n" $key) }}
+  {{- end }}
+{{- end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Values.general.projectId }}-ckan-env-config"
+  labels:
+    app: ckan
+data:
+  {{- with .Values.ckan.config }}
+  {{ toYaml . | nindent 2 }}
+  {{- end }}
+{{ end }}

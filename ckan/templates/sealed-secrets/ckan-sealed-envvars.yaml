@@ -1,17 +1,17 @@
-{{ if .Values.ckan.env }}
+{{- if and .Values.general.useSealedSecrets .Values.ckan.env }}
 apiVersion: bitnami.com/v1alpha1
 kind: SealedSecret
 metadata:
   annotations:
     sealedsecrets.bitnami.com/cluster-wide: "true"
-  name: "{{ .Values.general.projectId }}-ckan-sealed-envvars"
+  name: "{{ .Values.general.projectId }}-ckan-envvars"
 spec:
-  {{ with .Values.ckan.env }}
+  {{- with .Values.ckan.env }}
   encryptedData:
     {{ toYaml . | nindent 4 }}
-  {{ end }}
+  {{- end }}
   template:
     metadata:
-      name: "{{ .Values.general.projectId }}-ckan-sealed-envvars"
+      name: "{{ .Values.general.projectId }}-ckan-envvars"
     type: Opaque
-{{ end }}
+{{- end }}

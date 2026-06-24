@@ -1,0 +1,15 @@
+{{- if .Values.datapusher.config }}
+{{- range $key, $value := .Values.datapusher.config }}
+  {{- if or (regexMatch "(?i)postgres(ql)?://" (toString $value)) (regexMatch "(?i)redis://" (toString $value)) (regexMatch "(?i)secret" $key) }}
+    {{- fail (printf "\n\n[SECURITY ERROR]: Detected sensitive data in '.Values.datapusher.config.%s'. Move this to '.Values.datapusher.env'!\n" $key) }}
+  {{- end }}
+{{- end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Values.general.projectId }}-datapusher-env-config"
+data:
+  {{- with .Values.datapusher.config }}
+  {{ toYaml . | nindent 2 }}
+  {{- end }}
+{{- end }}

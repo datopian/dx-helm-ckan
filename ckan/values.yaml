@@ -1,7 +1,12 @@
 general:
   useProductionCerts: true
   projectId: may-awesome-project
-  dockerconfigjson: SealedCredentialsForDockerCOntainerRegistry
+  # -------------------------------------------------------------
+  # MASTER TOGGLE: Set to true to use SealedSecrets and ConfigMaps
+  # Set to false to fall back to legacy plain-text Secrets
+  # -------------------------------------------------------------
+  useSealedSecrets: true
+  dockerconfigjson: "AgBxp...[SEALED_DOCKER_CONFIG_JSON]..."
   imagePullSecrets: ckan-sealed-registry
   customResource: true
   resources: {}
@@ -65,8 +70,13 @@ ckan:
   service:
     type: ClusterIP
     port: 80
+
+  # --- SPLIT ARCHITECTURE ---
+  config:
+    CKAN_SITE_URL: "http://ckan.my-awesome-project.staging.datopian.com"
   env:
-   EXAMPLE_ENV: ""
+    CKAN_SQLALCHEMY_URL: "AgBxp...[SEALED_STRING]..."
+
   spot:
     enabled: false
     hpa:
@@ -91,12 +101,22 @@ ckan:
                   operator: In
                   values:
                     - "true"
+
 frontend:
-  enable: false
+  enable: true
   image:
     repository: datopian/frontend
     tag: latest
     pullPolicy: Always
+
+  # --- SPLIT ARCHITECTURE ---
+  config:
+    SITE_URL: "https://my-awesome-project.staging.datopian.com"
+    NODE_ENV: "production"
+    PORT: "8080"
+  env:
+    SESSION_SECRET: "AgBxp...[SEALED_STRING]..."
+
   hpa:
     enable: false
   vpa:
@@ -144,6 +164,13 @@ datapusher:
     repository: datopian/datapusher
     tag: latest
     pullPolicy: Always
+
+  # --- SPLIT ARCHITECTURE ---
+  config:
+    DATAPUSHER_CHUNK_SIZE: "2000"
+  env:
+    DATAPUSHER_DATABASE_URL: "AgBxp...[SEALED_STRING]..."
+
   hpa:
     enable: false
   vpa:
@@ -184,6 +211,8 @@ dataSubscriptions:
     repository: datopian/data-subscriptions
     tag: latest
     pullPolicy: Always
+  config: {}
+  env: {}
 
 auth:
   enable: false
@@ -191,6 +220,8 @@ auth:
     repository: datopian/auth
     tag: latest
     pullPolicy: Always
+  config: {}
+  env: {}
 
 giftless:
   enable: false
@@ -198,11 +229,26 @@ giftless:
     repository: datopian/giftless
     tag: 0.1.2
 
+  # Legacy fields (Used if useSealedSecrets: false)
+  project: legacy-project-name
+  bucket: legacy-bucket-name
+  GoogleAccountCredentials: legacy-base64-creds
+
+  # New Secure Field (Used if useSealedSecrets: true)
+  # Seal the entire giftless.yaml file using:
+  # kubeseal --raw --from-file=giftless.yaml --scope cluster-wide
+  env:
+    GIFTLESS_YAML_CONTENT: "AgBxp...[SEALED_ENTIRE_FILE_STRING]..."
+
 postgresql:
   enable: false
 
 xloader:
   enable: false
+  hpa:
+    enable: false
+  config: {}
+  env: {}
   spot:
     enabled: false
     hpa:
@@ -236,6 +282,10 @@ ckanmiddleware:
 
 hasura:
   enable: false
+  config: {}
+  env: {}
 
 dataAPI:
   enable: false
+  config: {}
+  env: {}

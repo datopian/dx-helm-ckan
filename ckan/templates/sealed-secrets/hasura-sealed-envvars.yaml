@@ -1,17 +1,17 @@
-{{- if and .Values.general.useSealedSecrets (and .Values.auth.enable .Values.auth.env) }}
+{{- if and .Values.general.useSealedSecrets (and .Values.hasura.enable .Values.hasura.env) }}
 apiVersion: bitnami.com/v1alpha1
 kind: SealedSecret
 metadata:
   annotations:
     sealedsecrets.bitnami.com/cluster-wide: "true"
-  name: "{{ .Values.general.projectId }}-auth-envvars"
+  name: "{{ .Values.general.projectId }}-hasura-envvars"
 spec:
-  {{- with .Values.auth.env }}
+  {{- with .Values.hasura.env }}
   encryptedData:
     {{ toYaml . | nindent 4 }}
   {{- end }}
   template:
     metadata:
-      name: "{{ .Values.general.projectId }}-auth-envvars"
+      name: "{{ .Values.general.projectId }}-hasura-envvars"
     type: Opaque
 {{- end }}
