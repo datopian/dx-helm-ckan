@@ -99,6 +99,10 @@ spec:
       containers:
         - name: ckan
           envFrom:
+            {{- if .Values.ckan.config }}
+            - configMapRef:
+                name: {{ .Values.general.projectId }}-ckan-env-config
+            {{- end }}
             {{ if .Values.ckan.env }}
             - secretRef:
                 name: {{ .Values.general.projectId }}-ckan-envvars
@@ -175,14 +179,21 @@ spec:
             {{ end }}
 
       volumes:
-        {{ if .Values.giftless.enable -}}
+        {{- if .Values.giftless.enable }}
         - name: giftless-configmap
+          {{- if .Values.general.useSealedSecrets }}
+          # NEW BEHAVIOR: Mount the decrypted Sealed Secret
+          secret:
+            secretName: {{ .Values.general.projectId }}-giftless-config
+          {{- else }}
+          # LEGACY BEHAVIOR: Mount the plain-text ConfigMap
           configMap:
             name: giftless-configmap
+          {{- end }}
         - name: jwt-keys
           secret:
             secretName: jwt-keys
-        {{ end }}
+        {{- end }}
         - name: ckan-deployment
           configMap:
             defaultMode: 0777
