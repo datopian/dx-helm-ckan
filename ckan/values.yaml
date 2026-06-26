@@ -73,9 +73,7 @@ ckan:
 
   # --- SPLIT ARCHITECTURE ---
   config: {}
-    CKAN_SITE_URL: "http://ckan.my-awesome-project.staging.datopian.com"
   env: {}
-    CKAN_SQLALCHEMY_URL: "AgBxp...[SEALED_STRING]..."
 
   spot:
     enabled: false
