@@ -238,3 +238,10 @@ hasura:
 
 dataAPI:
   enable: false
+  hpa:
+    enable: false
+  image: {}
+  spot:
+    enabled: false
+    hpa:
+      enable: false

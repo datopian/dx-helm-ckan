@@ -1,24 +1,33 @@
 {{- $ds := (include "ckan.datastore" . | fromYaml) -}}
-{{ if $ds.enable }}
+{{- if and $ds.spot $ds.spot.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.general.projectId }}-data-api
+  name: {{ .Values.general.projectId }}-data-api-spot
   labels:
     app: data-api
+    spot: "true"
 spec:
-  {{ if not $ds.hpa.enable }}
-  replicas: {{ $ds.replicaCount | default 1 }}
+  {{ if not $ds.spot.hpa.enable }}
+  replicas: {{ $ds.spot.replicaCount | default 0 }}
   {{ end }}
   selector:
     matchLabels:
       app: data-api
+      spot: "true"
   template:
     metadata:
       labels:
         app: data-api
+        spot: "true"
     spec:
       terminationGracePeriodSeconds: {{ $ds.terminationGracePeriodSeconds | default 60 }}
+      nodeSelector:
+{{ toYaml $ds.spot.nodeSelector | nindent 8 }}
+      tolerations:
+{{ toYaml $ds.spot.tolerations | nindent 8 }}
+      affinity:
+{{ toYaml $ds.spot.affinity | nindent 8 }}
       {{ if .Values.general.imagePullSecrets }}
       imagePullSecrets:
         - name: {{ .Values.general.imagePullSecrets }}
@@ -54,7 +63,11 @@ spec:
             {{ end }}
           {{ end }}
           resources:
-            {{ if $ds.resources }}
+            {{ if $ds.spot.resources }}
+            {{ with $ds.spot.resources }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+            {{ else if $ds.resources }}
             {{ with $ds.resources }}
             {{ toYaml . | nindent 12 }}
             {{ end }}
@@ -69,5 +82,4 @@ spec:
           ports:
             - containerPort: 3000
               protocol: TCP
-
 {{ end }}

@@ -52,6 +52,18 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Datastore (Data API) config. Renamed from `dataAPI` to `datastore` for
+consistency; `dataAPI` is still accepted as a backward-compatible alias so
+existing environments do not break. Returns the resolved config dict.
+*/}}
+{{- define "ckan.datastore" -}}
+{{- $merged := dict -}}
+{{- with .Values.dataAPI -}}{{- $merged = deepCopy . -}}{{- end -}}
+{{- with .Values.datastore -}}{{- $merged = mergeOverwrite $merged (deepCopy .) -}}{{- end -}}
+{{- toYaml $merged -}}
+{{- end -}}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "ckan.serviceAccountName" -}}

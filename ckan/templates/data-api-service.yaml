@@ -1,13 +1,14 @@
-{{ if .Values.dataAPI.enable }}
+{{- $ds := (include "ckan.datastore" . | fromYaml) -}}
+{{ if $ds.enable }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.general.projectId }}-data-api-svc
 spec:
-  type: {{ .Values.dataAPI.serviceType | default "ClusterIP" }}
+  type: {{ $ds.serviceType | default "ClusterIP" }}
   ports:
-    - port: {{ .Values.dataAPI.port | default 80 }}
-      targetPort: {{ .Values.dataAPI.targetPort | default 3000 }}
+    - port: {{ $ds.port | default 80 }}
+      targetPort: {{ $ds.targetPort | default 3000 }}
       protocol: TCP
       name: http
   selector:

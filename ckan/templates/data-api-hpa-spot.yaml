@@ -1,0 +1,31 @@
+{{- $ds := (include "ckan.datastore" . | fromYaml) -}}
+{{- if and $ds.spot $ds.spot.enabled $ds.spot.hpa.enable }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Values.general.projectId }}-data-api-spot-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Values.general.projectId }}-data-api-spot
+  minReplicas: {{ $ds.spot.hpa.minReplicas | default 1 }}
+  maxReplicas: {{ $ds.spot.hpa.maxReplicas | default 3 }}
+  metrics:
+  {{ if $ds.spot.hpa.cpuTarget }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $ds.spot.hpa.cpuTarget }}
+  {{ end }}
+  {{ if $ds.spot.hpa.memoryTarget }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ $ds.spot.hpa.memoryTarget }}
+  {{ end }}
+{{ end }}
