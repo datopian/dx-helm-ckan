@@ -1,10 +1,10 @@
 {{- if and .Values.general.useSealedSecrets (and .Values.hasura.enable .Values.hasura.env) }}
+{{- include "ckan.validateSealedData" (dict "data" .Values.hasura.env "path" "hasura.env") }}
 apiVersion: bitnami.com/v1alpha1
 kind: SealedSecret
 metadata:
-  annotations:
-    sealedsecrets.bitnami.com/cluster-wide: "true"
   name: "{{ .Values.general.projectId }}-hasura-envvars"
+  {{- include "ckan.sealedSecretAnnotations" . | nindent 2 }}
 spec:
   {{- with .Values.hasura.env }}
   encryptedData:

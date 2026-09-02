@@ -1,10 +1,10 @@
-{{- if .Values.general.useSealedSecrets }}
+{{- if and .Values.general.useSealedSecrets .Values.general.dockerconfigjson }}
+{{- include "ckan.validateSealedData" (dict "data" (dict "dockerconfigjson" .Values.general.dockerconfigjson) "path" "general") }}
 apiVersion: bitnami.com/v1alpha1
 kind: SealedSecret
 metadata:
-  annotations:
-    sealedsecrets.bitnami.com/cluster-wide: "true"
   name: {{ .Values.general.imagePullSecrets }}
+  {{- include "ckan.sealedSecretAnnotations" . | nindent 2 }}
 spec:
   encryptedData:
     .dockerconfigjson: {{ .Values.general.dockerconfigjson | quote }}

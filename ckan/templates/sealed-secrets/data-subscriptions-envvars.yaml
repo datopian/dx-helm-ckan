@@ -1,10 +1,10 @@
 {{- if and .Values.general.useSealedSecrets (and .Values.dataSubscriptions.enable .Values.dataSubscriptions.env) }}
+{{- include "ckan.validateSealedData" (dict "data" .Values.dataSubscriptions.env "path" "dataSubscriptions.env") }}
 apiVersion: bitnami.com/v1alpha1
 kind: SealedSecret
 metadata:
-  annotations:
-    sealedsecrets.bitnami.com/cluster-wide: "true"
   name: "{{ .Values.general.projectId }}-data-subscriptions-envvars"
+  {{- include "ckan.sealedSecretAnnotations" . | nindent 2 }}
 spec:
   {{- with .Values.dataSubscriptions.env }}
   encryptedData:
