@@ -6,6 +6,14 @@ general:
   # Set to false to fall back to legacy plain-text Secrets
   # -------------------------------------------------------------
   useSealedSecrets: true
+  # Scope the SealedSecret ciphertext is sealed with. MUST match the scope used
+  # by kubeseal, or the controller reports "no key could decrypt secret".
+  #   strict         (default) bound to namespace + secret name
+  #   namespace-wide bound to the namespace only
+  #   cluster-wide   unsealable into ANY namespace under ANY name
+  # Prefer strict; cluster-wide lets anyone who can create a SealedSecret in any
+  # namespace of a shared cluster unseal these values into their own namespace.
+  sealedSecretScope: strict
   dockerconfigjson: "AgBxp...[SEALED_DOCKER_CONFIG_JSON]..."
   imagePullSecrets: ckan-sealed-registry
   customResource: true

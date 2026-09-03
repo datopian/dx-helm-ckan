@@ -16,6 +16,11 @@ All the values that need to be overridden from the ckan chart should come under 
 
 ## General
 - `ckan.general.useSealedSecrets` - Master toggle to use SealedSecrets and ConfigMaps over legacy plain-text secrets [default: `true`]
+- `ckan.general.sealedSecretScope` - Scope the SealedSecret ciphertext was sealed with; must match the scope passed to `kubeseal`, or the controller reports `no key could decrypt secret`. One of `strict` (bound to namespace + secret name), `namespace-wide` (bound to the namespace) or `cluster-wide` (unsealable into ANY namespace under ANY name) [default: `strict`]
+
+  Prefer `strict`. On a shared cluster, `cluster-wide` means anyone able to create a SealedSecret in any namespace can unseal these values into their own namespace.
+
+  Note that only secrets belong in the `*.env` maps: every value there is placed under `spec.encryptedData` and must be `kubeseal` ciphertext. A single plaintext entry makes the controller reject the whole object with `illegal base64 data`, so the Secret is never created and every workload consuming it fails to start. Non-secret configuration belongs in `ckan.config`, which renders to a ConfigMap. The chart enforces this at render time.
 - `ckan.general.maintenance` - Enable it to put all the ingress in maintenance mode [default: `false`]
 - `ckan.general.maintenanceImage` - registry URL to pull image from [default: `registry.gitlab.com/datopian/deploys/maintenance-page:latest`]
 - `ckan.general.projectId`- The project ID <projectname-environment> Eg: datahub-staging
