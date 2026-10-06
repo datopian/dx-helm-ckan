@@ -19,6 +19,10 @@ spec:
       labels:
         app: frontend
     spec:
+      {{- if .Values.frontend.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml .Values.frontend.topologySpreadConstraints | nindent 8 }}
+      {{- end }}
       {{ if .Values.general.imagePullSecrets }}
       imagePullSecrets:
         - name: {{ .Values.general.imagePullSecrets }}
