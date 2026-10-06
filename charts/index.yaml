@@ -3,6 +3,25 @@ entries:
   ckan:
   - apiVersion: v2
     appVersion: 2.11.4
+    created: "2026-10-06T19:05:24.366345+05:00"
+    dependencies:
+    - condition: solr.enable
+      name: solr
+      repository: http://storage.googleapis.com/kubernetes-charts-incubator
+      version: 1.5.2
+    - condition: postgresql.enable
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 9.1.4
+    description: The world's leading Open Source data portal platform.
+    digest: f1c592c9973783f30167c15582c83d3566694358cc9ec3172eb2401636235e19
+    name: ckan
+    type: application
+    urls:
+    - https://raw.githubusercontent.com/datopian/dx-helm-ckan/sealed-charts/charts/ckan-v5.0.2.tgz
+    version: v5.0.2
+  - apiVersion: v2
+    appVersion: 2.11.4
     created: "2026-09-02T10:30:30.449128+02:00"
     dependencies:
     - condition: solr.enable
@@ -768,4 +787,4 @@ entries:
     urls:
     - https://raw.githubusercontent.com/datopian/dx-helm-ckan/sealed-charts/charts/ckan-v1.3.0.tgz
     version: v1.3.0
-generated: "2026-09-02T10:30:30.343615+02:00"
+generated: "2026-10-06T19:05:24.362986+05:00"

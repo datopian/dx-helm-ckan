@@ -64,11 +64,17 @@ spec:
 
           imagePullPolicy: {{ .Values.frontend.image.pullPolicy | default "Always" }}
 
-          {{ if .Values.frontend.env }}
+          {{- if or .Values.frontend.config .Values.frontend.env }}
           envFrom:
+            {{- if .Values.frontend.config }}
+            - configMapRef:
+                name: {{ .Values.general.projectId }}-frontend-env-config
+            {{- end }}
+            {{- if .Values.frontend.env }}
             - secretRef:
                 name: {{ .Values.general.projectId }}-frontend-envvars
-          {{ end }}
+            {{- end }}
+          {{- end }}
 
           ports:
             - containerPort: 4000
@@ -108,6 +114,12 @@ spec:
           {{ if .Values.frontend.livenessProbe }}
           livenessProbe:
             {{ with .Values.frontend.livenessProbe }}
+            {{ toYaml . | nindent 12 }}
+            {{ end }}
+          {{ end }}
+          {{ if .Values.frontend.readinessProbe }}
+          readinessProbe:
+            {{ with .Values.frontend.readinessProbe }}
             {{ toYaml . | nindent 12 }}
             {{ end }}
           {{ end }}
