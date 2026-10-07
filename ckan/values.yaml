@@ -135,6 +135,24 @@ frontend:
     requests:
       cpu: 200m
       memory: 1G
+  # Pod topology spread for the frontend Deployment (not the spot one, which has
+  # its own affinity). Empty = no constraints (the scheduler may stack pods on
+  # one node). Example: at most one pod more on any node than on another.
+  #   topologySpreadConstraints:
+  #     - maxSkew: 1
+  #       topologyKey: kubernetes.io/hostname
+  #       whenUnsatisfiable: ScheduleAnyway   # soft; DoNotSchedule enforces it
+  #                                           # (pods stay Pending if no node fits)
+  #       labelSelector:
+  #         matchLabels:
+  #           app: frontend
+  #       # Spread each ReplicaSet on its own. Without this, old pods still count
+  #       # during a rollout (every upgrade rolls the frontend) and new pods can
+  #       # land on one node.
+  #       matchLabelKeys:
+  #         - pod-template-hash
+  # Spread by hostname, not only by zone: a zone can hold several nodes.
+  topologySpreadConstraints: []
   spot:
     enabled: false
     hpa:
